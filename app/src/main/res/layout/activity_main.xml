@@ -4,15 +4,153 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/application_background"
+    android:padding="@dimen/common_padding"
     tools:context=".MainActivity">
 
-    <TextView
+
+    <ImageView
+        android:id="@+id/imageView1avatar"
+        android:layout_width="@dimen/postPic"
+        android:layout_height="@dimen/postPic"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_launcher_foreground2" />
+
+
+    <ImageView
+        android:id="@+id/imageView5menu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/maintext"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:padding="@dimen/common_padding"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_action_name3points" />
+
+    <LinearLayout
+        android:id="@+id/linearLayoutTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/common_padding"
+        app:layout_constraintBottom_toBottomOf="@id/imageView1avatar"
+        app:layout_constraintEnd_toStartOf="@id/imageView5menu"
+        app:layout_constraintStart_toEndOf="@id/imageView1avatar"
+        app:layout_constraintTop_toTopOf="@id/imageView1avatar">
+
+        <TextView
+            android:id="@+id/messageTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/message_title"
+            android:singleLine="true" />
+
+        <TextView
+            android:id="@+id/messageDateTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/message_date_time" />
+
+    </LinearLayout>
+
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrierTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierMargin="@dimen/common_margin"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="imageView5menu,imageView1avatar,linearLayoutTitle" />
+
+    <TextView
+        android:id="@+id/messageText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/common_padding"
+        app:layout_constraintTop_toBottomOf="@id/barrierTop"
+        android:text="@string/message_text"
+        android:ellipsize="none"
+        android:lineSpacingMultiplier="1.2" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrierMiddle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="messageText" />
+
+    <ImageView
+        android:id="@+id/imageView4Likes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/common_padding"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
+        app:srcCompat="@drawable/ic_action_name" />
+
+    <TextView
+        android:id="@+id/textView4Likes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/common_padding"
+        android:text="@string/text_count_likes"
+        app:layout_constraintBottom_toBottomOf="@id/imageView4Likes"
+        app:layout_constraintStart_toEndOf="@id/imageView4Likes"
+        app:layout_constraintTop_toTopOf="@id/imageView4Likes" />
+
+    <ImageView
+        android:id="@+id/imageView2share"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/common_padding"
+        app:layout_constraintStart_toEndOf="@id/textView4Likes"
+        app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
+        app:srcCompat="@drawable/ic_share" />
+
+    <TextView
+        android:id="@+id/textView2share"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/common_padding"
+        android:text="@string/text_count_shared"
+        app:layout_constraintBottom_toBottomOf="@id/imageView2share"
+        app:layout_constraintStart_toEndOf="@id/imageView2share"
+        app:layout_constraintTop_toTopOf="@id/imageView2share" />
+
+    <ImageView
+        android:id="@+id/imageView3views"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/common_padding"
+        app:layout_constraintEnd_toStartOf="@id/textView3views"
+        app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
+        app:srcCompat="@drawable/ic_action_name1eye" />
+
+    <TextView
+        android:id="@+id/textView3views"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/common_padding"
+        android:text="@string/text_count_views"
+        app:layout_constraintBottom_toBottomOf="@id/imageView3views"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/imageView3views" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrierPost"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="imageView4Likes,textView4Likes,imageView2share,textView2share,imageView3views,textView3views" />
+
+    <View
+        android:id="@+id/viewRedLine"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/line_thickness"
+        android:layout_margin="@dimen/common_margin"
+        android:background="@color/red_1"
+        app:layout_constraintTop_toBottomOf="@id/barrierPost" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
