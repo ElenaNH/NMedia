@@ -10,7 +10,7 @@
 
 
     <ImageView
-        android:id="@+id/imageView1avatar"
+        android:id="@+id/imgAvatar"
         android:layout_width="@dimen/postPic"
         android:layout_height="@dimen/postPic"
         app:layout_constraintStart_toStartOf="parent"
@@ -18,14 +18,14 @@
         app:srcCompat="@drawable/ic_launcher_foreground2" />
 
 
-    <ImageView
-        android:id="@+id/imageView5menu"
+    <ImageButton
+        android:id="@+id/ibtnMenuMoreActions"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="@dimen/common_padding"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_action_name3points" />
+        app:srcCompat="@drawable/ic_more_vert" />
 
     <LinearLayout
         android:id="@+id/linearLayoutTitle"
@@ -33,10 +33,10 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="@dimen/common_padding"
-        app:layout_constraintBottom_toBottomOf="@id/imageView1avatar"
-        app:layout_constraintEnd_toStartOf="@id/imageView5menu"
-        app:layout_constraintStart_toEndOf="@id/imageView1avatar"
-        app:layout_constraintTop_toTopOf="@id/imageView1avatar">
+        app:layout_constraintBottom_toBottomOf="@id/imgAvatar"
+        app:layout_constraintEnd_toStartOf="@id/ibtnMenuMoreActions"
+        app:layout_constraintStart_toEndOf="@id/imgAvatar"
+        app:layout_constraintTop_toTopOf="@id/imgAvatar">
 
         <TextView
             android:id="@+id/messageTitle"
@@ -60,7 +60,7 @@
         android:layout_height="wrap_content"
         app:barrierMargin="@dimen/common_margin"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="imageView5menu,imageView1avatar,linearLayoutTitle" />
+        app:constraint_referenced_ids="ibtnMenuMoreActions,imgAvatar,linearLayoutTitle" />
 
     <TextView
         android:id="@+id/messageText"
@@ -69,6 +69,7 @@
         android:padding="@dimen/common_padding"
         app:layout_constraintTop_toBottomOf="@id/barrierTop"
         android:text="@string/message_text"
+        android:autoLink="web"
         android:ellipsize="none"
         android:lineSpacingMultiplier="1.2" />
 
@@ -79,77 +80,78 @@
         app:barrierDirection="bottom"
         app:constraint_referenced_ids="messageText" />
 
-    <ImageView
-        android:id="@+id/imageView4Likes"
+    <ImageButton
+        android:id="@+id/ibtnLikes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="@dimen/common_padding"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
-        app:srcCompat="@drawable/ic_action_name" />
+        app:srcCompat="@drawable/ic_heart_unfilled" />
 
     <TextView
-        android:id="@+id/textView4Likes"
+        android:id="@+id/txtCountLikes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="@dimen/common_padding"
         android:text="@string/text_count_likes"
-        app:layout_constraintBottom_toBottomOf="@id/imageView4Likes"
-        app:layout_constraintStart_toEndOf="@id/imageView4Likes"
-        app:layout_constraintTop_toTopOf="@id/imageView4Likes" />
+        app:layout_constraintBottom_toBottomOf="@id/ibtnLikes"
+        app:layout_constraintStart_toEndOf="@id/ibtnLikes"
+        app:layout_constraintTop_toTopOf="@id/ibtnLikes" />
 
-    <ImageView
-        android:id="@+id/imageView2share"
+    <ImageButton
+        android:id="@+id/ibtnShare"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="@dimen/common_padding"
-        app:layout_constraintStart_toEndOf="@id/textView4Likes"
+        app:layout_constraintStart_toEndOf="@id/txtCountLikes"
         app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
         app:srcCompat="@drawable/ic_share" />
 
     <TextView
-        android:id="@+id/textView2share"
+        android:id="@+id/txtCountShare"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="@dimen/common_padding"
         android:text="@string/text_count_shared"
-        app:layout_constraintBottom_toBottomOf="@id/imageView2share"
-        app:layout_constraintStart_toEndOf="@id/imageView2share"
-        app:layout_constraintTop_toTopOf="@id/imageView2share" />
+        app:layout_constraintBottom_toBottomOf="@id/ibtnShare"
+        app:layout_constraintStart_toEndOf="@id/ibtnShare"
+        app:layout_constraintTop_toTopOf="@id/ibtnShare" />
 
     <ImageView
-        android:id="@+id/imageView3views"
+        android:id="@+id/imgViews"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="@dimen/common_padding"
-        app:layout_constraintEnd_toStartOf="@id/textView3views"
+        app:layout_constraintEnd_toStartOf="@id/txtCountViews"
         app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
-        app:srcCompat="@drawable/ic_action_name1eye" />
+        app:srcCompat="@drawable/ic_eye_of_view" />
 
     <TextView
-        android:id="@+id/textView3views"
+        android:id="@+id/txtCountViews"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="@dimen/common_padding"
         android:text="@string/text_count_views"
-        app:layout_constraintBottom_toBottomOf="@id/imageView3views"
+        app:layout_constraintBottom_toBottomOf="@id/imgViews"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/imageView3views" />
+        app:layout_constraintTop_toTopOf="@id/imgViews" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrierPost"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="imageView4Likes,textView4Likes,imageView2share,textView2share,imageView3views,textView3views" />
+        app:constraint_referenced_ids="ibtnLikes,txtCountLikes,ibtnShare,txtCountShare,imgViews,txtCountViews" />
 
-    <View
+    <!--<View
         android:id="@+id/viewRedLine"
         android:layout_width="match_parent"
         android:layout_height="@dimen/line_thickness"
         android:layout_margin="@dimen/common_margin"
         android:background="@color/red_1"
         app:layout_constraintTop_toBottomOf="@id/barrierPost" />
+-->
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
