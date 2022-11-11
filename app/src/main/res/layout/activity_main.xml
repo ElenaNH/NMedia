@@ -39,17 +39,17 @@
         app:layout_constraintTop_toTopOf="@id/imgAvatar">
 
         <TextView
-            android:id="@+id/messageTitle"
+            android:id="@+id/messageAuthor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/message_title"
+            android:text="@string/message_author"
             android:singleLine="true" />
 
         <TextView
-            android:id="@+id/messageDateTime"
+            android:id="@+id/messagePublished"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/message_date_time" />
+            android:text="@string/message_published" />
 
     </LinearLayout>
 
@@ -63,12 +63,12 @@
         app:constraint_referenced_ids="ibtnMenuMoreActions,imgAvatar,linearLayoutTitle" />
 
     <TextView
-        android:id="@+id/messageText"
+        android:id="@+id/messageContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/common_padding"
         app:layout_constraintTop_toBottomOf="@id/barrierTop"
-        android:text="@string/message_text"
+        android:text="@string/message_content"
         android:autoLink="web"
         android:ellipsize="none"
         android:lineSpacingMultiplier="1.2" />
@@ -78,7 +78,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="messageText" />
+        app:constraint_referenced_ids="messageContent" />
 
     <ImageButton
         android:id="@+id/ibtnLikes"
