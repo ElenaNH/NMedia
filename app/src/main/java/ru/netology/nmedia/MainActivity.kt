@@ -1,56 +1,51 @@
-package ru.netology.nmedia
+package ru.netology.nmedia          // Пока не будем вкладывать в лишний пакет package ru.netology.nmedia.activity
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.ActivityMainBinding
-import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.dto.statisticsToString
+import ru.netology.nmedia.viewmodel.PostViewModel
+import ru.netology.nmedia.dto.statisticsToString   // при этом dto.Post импортируется через PostViewModel и связанный с ней Repository
 
 class MainActivity : AppCompatActivity() {
+    val viewModel: PostViewModel by viewModels()
+    lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding = ActivityMainBinding.inflate(layoutInflater)
+        binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        subscribe()
+        setListeners()
+    }
 
-        val post = Post(
-            id = 1,
-            author = getString(R.string.message_title),
-            content = getString(R.string.message_text),
-            published = getString(R.string.message_date_time),
-            likedByMe = false,
-            countLikes = 1099,
-            countShare = 997 ,
-            countViews = 5
-        )
+    private fun setListeners() {
+        // Обработчики кликов
+        binding.ibtnLikes.setOnClickListener {
+            viewModel.like()
+        }
+        binding.ibtnShare.setOnClickListener {
+            viewModel.share()
+        }
+    }
 
-        with(binding) {
-            messageTitle.text = post.author
-            messageText.text = post.content
-            messageDateTime.text = post.published
-            if (post.likedByMe) {
-                ibtnLikes.setImageResource(R.drawable.ic_heart_filled_red)
-            }
-
-            // Тут надо сделать 1К, 1.1К, 1М и т.п.
-            txtCountLikes.text = post.countLikes.statisticsToString()
-            txtCountShare.text = post.countShare.statisticsToString()
-            txtCountViews.text = post.countViews.statisticsToString()
-
-            // Обработчики кликов
-            ibtnLikes.setOnClickListener {
-                post.likedByMe = !post.likedByMe
+    private fun subscribe() {
+        // Подписка
+        viewModel.data.observe(this) { post ->
+            with(binding) {
+                messageAuthor.text = post.author
+                messagePublished.text = post.published
+                messageContent.text = post.content
                 ibtnLikes.setImageResource(
                     if (post.likedByMe) R.drawable.ic_heart_filled_red else R.drawable.ic_heart_unfilled
                 )
-                post.countLikes += if (post.likedByMe) 1 else -1
                 txtCountLikes.text = post.countLikes.statisticsToString()
-            }
-
-            ibtnShare.setOnClickListener {
-                post.countShare++
                 txtCountShare.text = post.countShare.statisticsToString()
+                txtCountViews.text = post.countViews.statisticsToString()
             }
-
         }
     }
 }
+
+
