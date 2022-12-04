@@ -1,20 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
-    <!--    android:background="@color/application_background"-->
-    <!--    android:id="@+id/container"-->
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/card_post"
-        tools:itemCount="3"/>
+        app:layout_constraintBottom_toTopOf="@id/barrierBottom"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:itemCount="3"
+        tools:listitem="@layout/card_post" />
 
-</FrameLayout>
+
+    <EditText
+        android:id="@+id/editContent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:hint="@string/post_text"
+        android:importantForAutofill="no"
+        android:inputType="textMultiLine"
+        android:padding="@dimen/common_padding"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/ibtnSave"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/barrierBottom" />
+
+    <ImageButton
+        android:id="@+id/ibtnClear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/common_margin"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/description_post_like"
+        app:layout_constraintBottom_toTopOf="@id/ibtnSave"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/editContent"
+        app:srcCompat="@drawable/ic_clear" />
+
+    <ImageButton
+        android:id="@+id/ibtnSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/common_margin"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/description_post_like"
+        android:padding="@dimen/common_padding"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/editContent"
+        app:srcCompat="@drawable/ic_done" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrierBottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="editContent,ibtnSave,ibtnClear" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
 
