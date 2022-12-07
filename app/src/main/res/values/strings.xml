@@ -10,13 +10,14 @@
     <string name="text_count_views" translatable="false">5</string>
     <string name="menu_edit">Edit</string>
     <string name="menu_remove">Remove</string>
-    <string name="post_text">Post Text</string>
+    <string name="post_text">Double-click for adding post</string>
 
     <string name="description_post_author_avatar">Post author avatar</string>
     <string name="description_post_menu">Post menu</string>
     <string name="description_post_like">Like</string>
     <string name="description_post_share">Share</string>
     <string name="description_post_save">Save</string>
+    <string name="description_post_clear">Clear</string>
     <string name="error_empty_content">Content can\'t be empty</string>
 
 

@@ -37,11 +37,12 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/common_margin"
         android:background="@android:color/transparent"
-        android:contentDescription="@string/description_post_like"
-        app:layout_constraintBottom_toTopOf="@id/ibtnSave"
+        android:contentDescription="@string/description_post_clear"
+        android:padding="@dimen/wide_padding"
+        app:layout_constraintBottom_toTopOf="@id/editContent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/editContent"
-        app:srcCompat="@drawable/ic_clear" />
+        app:srcCompat="@drawable/ic_cross_x" />
 
     <ImageButton
         android:id="@+id/ibtnSave"
@@ -49,19 +50,27 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/common_margin"
         android:background="@android:color/transparent"
-        android:contentDescription="@string/description_post_like"
-        android:padding="@dimen/common_padding"
+        android:contentDescription="@string/description_post_save"
+        android:padding="@dimen/wide_padding"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/editContent"
         app:srcCompat="@drawable/ic_done" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="ibtnClear,ibtnSave"
+        tools:visibility="gone" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrierBottom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="top"
-        app:constraint_referenced_ids="editContent,ibtnSave,ibtnClear" />
+        app:constraint_referenced_ids="editContent,ibtnSave" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

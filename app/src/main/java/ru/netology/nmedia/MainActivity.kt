@@ -1,6 +1,8 @@
 package ru.netology.nmedia          // Пока не будем вкладывать в лишний пакет package ru.netology.nmedia.activity
 
 import android.os.Bundle
+import android.view.KeyEvent
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.Toast
@@ -32,6 +34,7 @@ class MainActivity : AppCompatActivity() {
 
         override fun onEdit(post: Post) {
             viewModel.startEditing(post)
+            binding.group.visibility = View.VISIBLE
         }
     }
 
@@ -41,7 +44,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)  // binding вынесли выше и отдали by lazy, и только при первом вызове реально создастся binding
-        binding.list.adapter = adapter   // val adapter = PostsAdapter(interactionListener) вынесли выше и отдали by lazy
+        binding.list.adapter =
+            adapter   // val adapter = PostsAdapter(interactionListener) вынесли выше и отдали by lazy
 
         subscribe()
         setListeners()
@@ -91,10 +95,20 @@ class MainActivity : AppCompatActivity() {
             viewModel.quitEditing()
             clearEditContent()
         }
+
+        binding.editContent.setOnClickListener {
+            // Если мы кликнули на поле, то группа кнопок должна появиться
+            // Но почему-то работает только двойной клик
+            // Поскольку кнопку "+" делать нельзя, то придется писать в хинт
+            binding.group.visibility = View.VISIBLE
+        }
+
     }
 
+    /* Сброс редактирования: скрыть кнопки, очистить поле, сбросить фокус, скрыть клавиатуру */
     private fun clearEditContent() {
         with(binding.editContent) {
+            binding.group.visibility = View.GONE
             setText("")
             clearFocus()
             AndroidUtils.hideKeyboard(this)
