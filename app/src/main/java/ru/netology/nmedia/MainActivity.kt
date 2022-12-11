@@ -34,7 +34,6 @@ class MainActivity : AppCompatActivity() {
 
         override fun onEdit(post: Post) {
             viewModel.startEditing(post)
-            binding.group.visibility = View.VISIBLE
         }
     }
 
@@ -63,9 +62,13 @@ class MainActivity : AppCompatActivity() {
             if (post.id == 0L) {
                 return@observe
             }
-            with(binding.editContent) {
-                requestFocus()
-                setText(post.content)
+            with(binding) {
+                editContent.requestFocus()
+                editContent.setText(post.content)
+
+                txtMessageOld.text = post.content
+                group.visibility = View.VISIBLE
+
             }
         }
 
@@ -96,13 +99,6 @@ class MainActivity : AppCompatActivity() {
             clearEditContent()
         }
 
-        binding.editContent.setOnClickListener {
-            // Если мы кликнули на поле, то группа кнопок должна появиться
-            // Но почему-то работает только двойной клик
-            // Поскольку кнопку "+" делать нельзя, то придется писать в хинт
-            binding.group.visibility = View.VISIBLE
-        }
-
     }
 
     /* Сброс редактирования: скрыть кнопки, очистить поле, сбросить фокус, скрыть клавиатуру */
@@ -113,6 +109,10 @@ class MainActivity : AppCompatActivity() {
             clearFocus()
             AndroidUtils.hideKeyboard(this)
         }
+        with(binding.txtMessageOld) {
+            text = ""
+        }
     }
+
 }
 
