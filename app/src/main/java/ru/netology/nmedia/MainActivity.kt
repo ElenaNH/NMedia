@@ -59,7 +59,9 @@ class MainActivity : AppCompatActivity() {
         }
         // Подписка на нижнее поле добавления/изменения
         viewModel.edited.observe(this) { post ->
+
             if (post.id == 0L) {
+                binding.group.visibility = View.GONE
                 return@observe
             }
             with(binding) {
