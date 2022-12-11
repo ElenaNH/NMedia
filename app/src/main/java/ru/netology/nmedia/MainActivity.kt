@@ -1,6 +1,8 @@
 package ru.netology.nmedia          // Пока не будем вкладывать в лишний пакет package ru.netology.nmedia.activity
 
 import android.os.Bundle
+import android.view.KeyEvent
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.Toast
@@ -41,7 +43,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)  // binding вынесли выше и отдали by lazy, и только при первом вызове реально создастся binding
-        binding.list.adapter = adapter   // val adapter = PostsAdapter(interactionListener) вынесли выше и отдали by lazy
+        binding.list.adapter =
+            adapter   // val adapter = PostsAdapter(interactionListener) вынесли выше и отдали by lazy
 
         subscribe()
         setListeners()
@@ -56,12 +59,18 @@ class MainActivity : AppCompatActivity() {
         }
         // Подписка на нижнее поле добавления/изменения
         viewModel.edited.observe(this) { post ->
+
             if (post.id == 0L) {
+                binding.group.visibility = View.GONE
                 return@observe
             }
-            with(binding.editContent) {
-                requestFocus()
-                setText(post.content)
+            with(binding) {
+                editContent.requestFocus()
+                editContent.setText(post.content)
+
+                txtMessageOld.text = post.content
+                group.visibility = View.VISIBLE
+
             }
         }
 
@@ -91,14 +100,21 @@ class MainActivity : AppCompatActivity() {
             viewModel.quitEditing()
             clearEditContent()
         }
+
     }
 
+    /* Сброс редактирования: скрыть кнопки, очистить поле, сбросить фокус, скрыть клавиатуру */
     private fun clearEditContent() {
         with(binding.editContent) {
+            binding.group.visibility = View.GONE
             setText("")
             clearFocus()
             AndroidUtils.hideKeyboard(this)
         }
+        with(binding.txtMessageOld) {
+            text = ""
+        }
     }
+
 }
 
