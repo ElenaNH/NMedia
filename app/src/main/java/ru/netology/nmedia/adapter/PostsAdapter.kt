@@ -45,9 +45,12 @@ class PostViewHolder(
             messageAuthor.text = post.author
             messagePublished.text = post.published
             messageContent.text = post.content
+            /* //Для типа элемента ImageButton
             ibtnLikes.setImageResource(
                 if (post.likedByMe) R.drawable.ic_heart_filled_red else R.drawable.ic_heart_unfilled
-            )
+            )*/
+            // Для типа элемента CheckBox
+            ibtnLikes.isChecked = post.likedByMe
             txtCountLikes.text = post.countLikes.statisticsToString()
             txtCountShare.text = post.countShare.statisticsToString()
             txtCountViews.text = post.countViews.statisticsToString()
