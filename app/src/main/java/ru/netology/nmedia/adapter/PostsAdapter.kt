@@ -45,23 +45,12 @@ class PostViewHolder(
             messageAuthor.text = post.author
             messagePublished.text = post.published
             messageContent.text = post.content
-            /* //Для типа элемента ImageButton (без селектора картинки в макете)
-            ibtnLikes.setImageResource(
-                if (post.likedByMe) R.drawable.ic_heart_filled_red else R.drawable.ic_heart_unfilled
-            )*/
-            /*// Для типа элемента CheckBox (с селектором картинки в макете)
-            ibtnLikes.isChecked = post.likedByMe
-            txtCountLikes.text = post.countLikes.statisticsToString()*/
             // Для MaterialButton (но не для Button)
             ibtnLikes.isChecked = post.likedByMe
-/*          // Для типа элемента Button&checkable=true (с селектором картинки в макете)
-            ibtnLikes.isPressed = post.likedByMe // Такое нажимается сразу, а отжимается только после трех отжатий*/
             ibtnLikes.text = post.countLikes.statisticsToString() // Число лайков прямо на кнопке
-
-            ibtnShare.text = post.countShare.statisticsToString()   // И тут вывели на кнопку
-
-            // txtCountViews.text = post.countViews.statisticsToString() // это уходит на кнопку
+            ibtnShare.text = post.countShare.statisticsToString()
             btnViews.text = post.countViews.statisticsToString()
+
 
             // Обработчики кликов
 

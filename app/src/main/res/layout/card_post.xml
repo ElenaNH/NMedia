@@ -17,17 +17,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_launcher_foreground2" />
 
-    <!-- Исходный вариант -->
-    <!--    <ImageButton
-            android:id="@+id/ibtnMenuMoreActions"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/description_post_menu"
-            android:padding="@dimen/common_padding"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_more_vert" />-->
-
     <com.google.android.material.button.MaterialButton
         android:id="@+id/ibtnMenuMoreActions"
         style="@style/Widget.AppTheme.UnspecifiedButton"
@@ -92,41 +81,6 @@
         app:barrierDirection="bottom"
         app:constraint_referenced_ids="messageContent" />
 
-    <!-- Исходный вариант -->
-    <!--    <ImageButton
-            android:id="@+id/ibtnLikes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/description_post_like"
-            android:padding="@dimen/common_padding"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
-            app:srcCompat="@drawable/ic_heart_unfilled" />-->
-
-    <!-- Реализация через CheckBox -->
-    <!--    <com.google.android.material.checkbox.MaterialCheckBox
-            android:id="@+id/ibtnLikes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/description_post_like"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
-            android:button="@drawable/ic_like"
-            style="@style/Widget.AppTheme.LikeCheckBox"/>-->
-
-    <!-- Реализация через Button -->
-    <!--<Button
-        android:id="@+id/ibtnLikes"
-        style="@style/Widget.AppTheme.LikeButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:checkable="true"
-        android:contentDescription="@string/description_post_like"
-        android:padding="@dimen/common_padding"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/barrierMiddle" />-->
-
-    <!-- Реализация через MaterialButton -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/ibtnLikes"
         style="@style/Widget.AppTheme.LikeButton"
@@ -139,28 +93,6 @@
         app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
         tools:text="10T" />
 
-    <!--    <TextView
-            android:id="@+id/txtCountLikes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/common_padding"
-            app:layout_constraintBottom_toBottomOf="@id/ibtnLikes"
-            app:layout_constraintStart_toEndOf="@id/ibtnLikes"
-            app:layout_constraintTop_toTopOf="@id/ibtnLikes"
-            tools:text="@string/text_count_likes" />-->
-
-    <!-- Исходный вариант -->
-    <!--    <ImageButton
-            android:id="@+id/ibtnShare"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/description_post_share"
-            android:padding="@dimen/common_padding"
-            app:layout_constraintStart_toEndOf="@id/txtCountLikes"
-            app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
-            app:srcCompat="@drawable/ic_share"
-            />-->
-
     <com.google.android.material.button.MaterialButton
         android:id="@+id/ibtnShare"
         style="@style/Widget.AppTheme.UnspecifiedButton"
@@ -172,24 +104,6 @@
         app:layout_constraintStart_toEndOf="@id/ibtnLikes"
         app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
         tools:text="25" />
-    <!-- style="@style/Widget.MaterialComponents.Button.TextButton.Icon" -->
-    <!--
-.OutlinedButton
-    style="@style/Widget.MaterialComponents.Button.TextButton"
-    android:width="@dimen/button_small"
-    android:padding="@dimen/common_padding"
-    -->
-
-    <!-- Количество перепостов будет отображаться на кнопке, так что это поле не нужно -->
-    <!--<TextView
-        android:id="@+id/txtCountShare"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/common_padding"
-        app:layout_constraintBottom_toBottomOf="@id/ibtnShare"
-        app:layout_constraintStart_toEndOf="@id/ibtnShare"
-        app:layout_constraintTop_toTopOf="@id/ibtnShare"
-        tools:text="@string/text_count_shared" />-->
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnViews"
@@ -201,33 +115,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
         tools:text="255" />
-
-    <!-- Исходный вариант -->
-    <!--    <ImageView
-            android:id="@+id/imgViews"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/common_padding"
-            app:layout_constraintEnd_toStartOf="@id/txtCountViews"
-            app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
-            app:srcCompat="@drawable/ic_eye_of_view" />
-
-        <TextView
-            android:id="@+id/txtCountViews"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/common_padding"
-            app:layout_constraintBottom_toBottomOf="@id/imgViews"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/imgViews"
-            tools:text="@string/text_count_views" />-->
-
-    <!--<androidx.constraintlayout.widget.Barrier
-        android:id="@+id/barrierPost"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="bottom"
-        app:constraint_referenced_ids="ibtnLikes,txtCountLikes,ibtnShare,txtCountShare,imgViews,txtCountViews" />-->
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
