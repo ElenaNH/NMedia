@@ -17,16 +17,16 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_launcher_foreground2" />
 
-
-    <ImageButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/ibtnMenuMoreActions"
+        style="@style/Widget.AppTheme.UnspecifiedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/description_post_menu"
         android:padding="@dimen/common_padding"
+        app:icon="@drawable/ic_more_vert"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_more_vert" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:id="@+id/linearLayoutTitle"
@@ -81,106 +81,40 @@
         app:barrierDirection="bottom"
         app:constraint_referenced_ids="messageContent" />
 
-<!-- Исходный вариант -->
-<!--    <ImageButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/ibtnLikes"
+        style="@style/Widget.AppTheme.LikeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:checkable="true"
         android:contentDescription="@string/description_post_like"
         android:padding="@dimen/common_padding"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
-        app:srcCompat="@drawable/ic_heart_unfilled" />-->
+        tools:text="10T" />
 
-    <com.google.android.material.checkbox.MaterialCheckBox
-        android:id="@+id/ibtnLikes"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/description_post_like"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
-        android:button="@drawable/ic_like"
-        style="@style/Widget.AppTheme.LikeCheckBox"/>
-    <!--
-        android:padding="@dimen/common_padding"
-        app:srcCompat="@drawable/ic_heart_unfilled"
-    -->
-
-    <TextView
-        android:id="@+id/txtCountLikes"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/common_padding"
-        app:layout_constraintBottom_toBottomOf="@id/ibtnLikes"
-        app:layout_constraintStart_toEndOf="@id/ibtnLikes"
-        app:layout_constraintTop_toTopOf="@id/ibtnLikes"
-        tools:text="@string/text_count_likes" />
-
-<!-- Исходный вариант -->
-<!--    <ImageButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/ibtnShare"
+        style="@style/Widget.AppTheme.UnspecifiedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/description_post_share"
         android:padding="@dimen/common_padding"
-        app:layout_constraintStart_toEndOf="@id/txtCountLikes"
-        app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
-        app:srcCompat="@drawable/ic_share"
-        />-->
-
-    <Button
-        android:id="@+id/ibtnShare"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/description_post_share"
-        app:layout_constraintStart_toEndOf="@id/txtCountLikes"
-        app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
-        style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
         app:icon="@drawable/ic_share"
-        android:text="Share"
-        />
-        <!--
-.OutlinedButton
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:width="@dimen/button_small"
-        android:padding="@dimen/common_padding"
-        -->
-
-    <TextView
-        android:id="@+id/txtCountShare"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/common_padding"
-        app:layout_constraintBottom_toBottomOf="@id/ibtnShare"
-        app:layout_constraintStart_toEndOf="@id/ibtnShare"
-        app:layout_constraintTop_toTopOf="@id/ibtnShare"
-        tools:text="@string/text_count_shared" />
-
-    <ImageView
-        android:id="@+id/imgViews"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/common_padding"
-        app:layout_constraintEnd_toStartOf="@id/txtCountViews"
+        app:layout_constraintStart_toEndOf="@id/ibtnLikes"
         app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
-        app:srcCompat="@drawable/ic_eye_of_view" />
+        tools:text="25" />
 
-    <TextView
-        android:id="@+id/txtCountViews"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnViews"
+        style="@style/Widget.AppTheme.UnspecifiedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="@dimen/common_padding"
-        app:layout_constraintBottom_toBottomOf="@id/imgViews"
+        app:icon="@drawable/ic_eye_of_view"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/imgViews"
-        tools:text="@string/text_count_views" />
-
-    <!--<androidx.constraintlayout.widget.Barrier
-        android:id="@+id/barrierPost"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="bottom"
-        app:constraint_referenced_ids="ibtnLikes,txtCountLikes,ibtnShare,txtCountShare,imgViews,txtCountViews" />-->
+        app:layout_constraintTop_toBottomOf="@id/barrierMiddle"
+        tools:text="255" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
