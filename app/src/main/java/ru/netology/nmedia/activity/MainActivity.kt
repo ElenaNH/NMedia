@@ -83,10 +83,14 @@ class MainActivity : AppCompatActivity() {
 
         // Подписка на список сообщений
         viewModel.data.observe(this) { posts ->
-            adapter.submitList(posts)   // обновление списка отображаемых постов в RecyclerView
-            // далее - прокрутка до верхнего элемента списка (с индексом 0)
-            // ПОЧЕМУ-ТО ПРОКРУЧИВАЕТ К ЭЛЕМЕНТУ С ИНДЕКСОМ 1, а не к верхнему
-            binding.list.smoothScrollToPosition(0)
+            val newPost = (adapter.currentList.size < posts.size) // элементов в списке стало больше
+            // далее обновление списка отображаемых постов в RecyclerView
+            adapter.submitList(posts) {
+                // далее - прокрутка до верхнего элемента списка (с индексом 0)
+                // ее нужно делать только если обновился список в адаптере
+                // иначе он не к верхнему прокрутит, а ко второму
+                if (newPost) binding.list.smoothScrollToPosition(0)
+            }
         }
 
 /*        // Подписка на нижнее поле добавления/изменения
