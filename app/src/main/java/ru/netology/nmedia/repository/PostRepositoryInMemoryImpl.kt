@@ -10,6 +10,16 @@ class PostRepositoryInMemoryImpl : PostRepository {
     private var posts = listOf(
         Post(
             id = nextId++,
+            author = "Нетология-0. Пустой пост",
+            content = "",
+            published = "21 мая в 18:36",
+            likedByMe = false,
+            countLikes = 1099,
+            countShare = 997,
+            countViews = 5
+        ),
+        Post(
+            id = nextId++,
             author = "Нетология-1.! Университет интернет-профессий будущего",
             content = "Привет, это новая Нетология!",
             published = "21 мая в 18:36",
