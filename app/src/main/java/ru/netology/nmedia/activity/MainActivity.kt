@@ -1,6 +1,7 @@
 package ru.netology.nmedia.activity
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -48,8 +49,18 @@ class MainActivity : AppCompatActivity() {
             viewModel.startEditing(post)
             // Если пост непустой, то запустим окно редактирования поста
             // А текст поста новая активити получит из нашего контракта
-            // Но для этого мы должны передать его в лончер в качестве аргумента
+            // Но для этого мы должны передать этот текст в лончер в качестве аргумента
             newPostContract.launch(post.content)
+        }
+
+        override fun onVideoLinkClick(post: Post) {
+            // Тут по-другому создается интент
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(post.videoLink))
+
+            // Следующая строка необязательная - интент на красивый выбор запускаемого приложения
+            val shareIntent = Intent.createChooser(intent, getString(R.string.chooser_share_post))
+            // А здесь мы могли запустить наш intent без красоты, либо улучшенный shareIntent
+            startActivity(shareIntent)
         }
     }
 
