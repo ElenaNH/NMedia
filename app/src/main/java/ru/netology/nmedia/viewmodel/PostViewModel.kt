@@ -24,8 +24,8 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     // упрощённый вариант
 //    private val repository: PostRepository =
 //        PostRepositoryInMemoryImpl() // Пока сохраним упрощенный код, хоть так обычно и не делается
-    private val repository: PostRepository = PostRepositorySharedPrefsImpl(application)
-    // private val repository: PostRepository = PostRepositoryFileImpl(application)
+//    private val repository: PostRepository = PostRepositorySharedPrefsImpl(application)
+    private val repository: PostRepository = PostRepositoryFileImpl(application)
 
 
     val data = repository.getAll()
@@ -37,12 +37,15 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
         quitEditing()
     }
+
     fun startEditing(post: Post) {
         edited.value = post
     }
-    fun quitEditing(){
+
+    fun quitEditing() {
         edited.value = emptyPost
     }
+
     fun changeContent(content: String) {
         val text = content.trim()
         if (edited.value?.content == text) {
