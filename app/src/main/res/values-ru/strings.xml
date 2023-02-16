@@ -17,5 +17,7 @@
     <string name="description_post_save">Сохранить</string>
     <string name="description_post_clear">Очистить</string>
     <string name="error_empty_content">Сообщение не может быть пустым</string>
+    <string name="chooser_share_post">Поделиться...</string>
+    <string name="add_post">Новое сообщение</string>
 
 </resources>
