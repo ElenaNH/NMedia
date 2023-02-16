@@ -134,24 +134,7 @@ class MainActivity : AppCompatActivity() {
             newPostContract.launch(null)  // а тут запускаем с null, т.к. пост новый, у него еще нет контента
         }
 
-/*        binding.ibtnSave.setOnClickListener {
-            with(binding.editContent) {
-                if (text.isNullOrBlank()) {
-                    Toast.makeText(
-                        this@MainActivity,
-                        context.getString(R.string.error_empty_content),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@setOnClickListener
-                }
-
-                viewModel.changeContent(text.toString())
-                viewModel.save()
-            }
-            clearEditContent()
-        }
-
-        binding.ibtnClear.setOnClickListener {
+/*          binding.ibtnClear.setOnClickListener {
             viewModel.quitEditing()
             clearEditContent()
         }*/
