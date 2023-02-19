@@ -21,9 +21,8 @@ private val emptyPost = Post(
 
 //class PostViewModel : ViewModel()
 class PostViewModel(application: Application) : AndroidViewModel(application) {
-    // упрощённый вариант
-//    private val repository: PostRepository =
-//        PostRepositoryInMemoryImpl() // Пока сохраним упрощенный код, хоть так обычно и не делается
+    // упрощённый вариант // Пока сохраним упрощенный код, хоть так обычно и не делается
+//    private val repository: PostRepository = PostRepositoryInMemoryImpl()
 //    private val repository: PostRepository = PostRepositorySharedPrefsImpl(application)
     private val repository: PostRepository = PostRepositoryFileImpl(application)
 
