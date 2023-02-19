@@ -14,7 +14,6 @@ class PostRepositorySharedPrefsImpl(
     private val prefs = context.getSharedPreferences("repo", Context.MODE_PRIVATE)
     private val type = TypeToken.getParameterized(List::class.java, Post::class.java).type
     private val key = "posts"
-    private var nextId = 1L
     private var posts = emptyList<Post>()
     private val data = MutableLiveData(posts)
 
@@ -29,9 +28,16 @@ class PostRepositorySharedPrefsImpl(
     override fun save(post: Post) {
         if (post.id == 0L) {
             // TODO: remove hardcoded author & published
+            val maxPostId = when {
+                (posts == null) -> 0
+                (posts.size == 0) -> 0
+                else -> posts.maxOfOrNull { it.id }
+                    ?: 0   // Если список пуст, то максимальный номер 0
+            }
+
             posts = listOf(
                 post.copy(
-                    id = nextId++,
+                    id = maxPostId + 1,
                     author = "Me",
                     likedByMe = false,
                     published = "now"
