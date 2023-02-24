@@ -39,10 +39,12 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     fun startEditing(post: Post) {
         edited.value = post
+        val stopHere = 1
     }
 
     fun quitEditing() {
         edited.value = emptyPost
+        val stopHere = 1
     }
 
     fun changeContent(content: String) {
