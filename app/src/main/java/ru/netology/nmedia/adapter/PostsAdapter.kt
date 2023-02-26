@@ -16,6 +16,7 @@ interface OnInteractionListener {
     fun onEdit(post: Post) {}
     fun onRemove(post: Post) {}
     fun onVideoLinkClick(post: Post) {}
+    fun onViewSingle(post: Post) {}
 }
 
 
@@ -66,6 +67,10 @@ class PostViewHolder(
 
             videoLinkPic.setOnClickListener() {
                 onInteractionListener.onVideoLinkClick(post)
+            }
+
+            messageContent.setOnClickListener(){
+                onInteractionListener.onViewSingle(post)
             }
 
             ibtnMenuMoreActions.setOnClickListener {

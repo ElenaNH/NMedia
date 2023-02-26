@@ -14,6 +14,7 @@ import ru.netology.nmedia.viewmodel.PostViewModel
 import android.view.Gravity
 import android.widget.Toast
 import ru.netology.nmedia.R
+import ru.netology.nmedia.util.ARG_POST_ID
 
 //import ru.netology.nmedia.databinding.FragmentFeedBinding
 
@@ -31,16 +32,17 @@ class NewPostFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-//        super.onCreate(savedInstanceState)
+// Если удастся объявить binding через by lazy, то этот кусочек кода уйдет
         val binding = FragmentNewPostBinding.inflate(
             inflater,
             container,
-            false  // false означает, что система сама добавить этот view, когда посчитает нужным
+            false  // false означает, что система сама добавит этот view, когда посчитает нужным
         )
 
         arguments?.textArg
             ?.let(binding.editContent::setText) // Задаем текст поста из передаточного элемента textArg
 
+        // Пока не пойму, как объявить binding через by lazy, лучше не выносить отсюда этот лиснер
         binding.btnOk.setOnClickListener {
             if (binding.editContent.text.isNullOrBlank()) {
 
@@ -55,11 +57,12 @@ class NewPostFragment : Fragment() {
                 return@setOnClickListener
 
             } else {
-
+                // Поскольку viewModel общая, то можно прямо тут сохраниться
                 viewModel.changeContent(binding.editContent.text.toString())
                 viewModel.save()
                 AndroidUtils.hideKeyboard(requireView())
-                findNavController().navigateUp() //  Закрытие текущего фрагмента (переход к нижележащему в стеке)
+                // Закрытие текущего фрагмента (переход к нижележащему в стеке)
+                findNavController().navigateUp()
             }
         }
         return binding.root

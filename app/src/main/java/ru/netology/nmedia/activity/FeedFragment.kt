@@ -14,14 +14,20 @@ import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
+import ru.netology.nmedia.adapter.PostInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.viewmodel.PostViewModel
 import ru.netology.nmedia.databinding.FragmentFeedBinding
+import ru.netology.nmedia.util.ARG_POST_ID
+
 
 class FeedFragment : Fragment() {
 //  viewModels используем теперь с аргументом, чтобы сделать общую viewModel для всех фрагментов
     val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
+    // interactionListener должен быть доступен также из фрагмента PostFragment
+    // private убираем???
+/*
     private val interactionListener = object : OnInteractionListener {
         override fun onLike(post: Post) {
             viewModel.likeById(post.id)
@@ -68,7 +74,27 @@ class FeedFragment : Fragment() {
             // А здесь мы могли запустить наш intent без красоты, либо улучшенный shareIntent
             startActivity(shareIntent)
         }
+
+        override fun onViewSingle(post: Post) {
+            if (!this.javaClass.toString().contains("FeedFragment")) return
+
+            // Если мы тут, то это FeedFragment
+            findNavController().navigate(
+                R.id.action_feedFragment_to_postFragment,
+                Bundle().apply {
+                    putLong(ARG_POST_ID, post.id)
+                // Почему-то написание еще одного синглтона не кажется хорошей идеей
+                // Не писать же синглтон под каждый аргумент - чем это проще putLong?
+
+                    //textArg =
+                    //    post.content.toString()  // В запускаемый фрагмент передаем данные редактируемого поста
+                }
+            )
+        }
     }
+*/
+
+    private val interactionListener by lazy {  PostInteractionListener(viewModel, this)}
 
     // создаем привязку к элементам макета по первому обращению к ним
     //private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
@@ -136,5 +162,6 @@ class FeedFragment : Fragment() {
             )
 
         }
+
     }
 }
