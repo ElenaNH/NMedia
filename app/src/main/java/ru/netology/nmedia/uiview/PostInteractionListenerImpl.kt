@@ -1,24 +1,24 @@
-package ru.netology.nmedia.adapter
+package ru.netology.nmedia.uiview
 
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 //import androidx.core.content.ContextCompat.startActivity
-import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.util.ARG_POST_ID
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.activity.FeedFragment
 import ru.netology.nmedia.activity.PostFragment
+import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.viewmodel.PostViewModel
 
-class PostInteractionListener(viewModelInput: PostViewModel, fragmentInput: Fragment) :
+class PostInteractionListenerImpl(viewModelInput: PostViewModel, fragmentInput: Fragment) :
     OnInteractionListener {
-    /* Поскольку интерфейс OnInteractionListener описан в пакете adapter, то и наш класс разместим тут */
+    /* Необходимо применить интерфейс OnInteractionListener к конкретному фрагменту
+    и для этого фрагмента (т.е., для view) реализовать все необходимые обработчики */
     private val viewModel: PostViewModel = viewModelInput
     private val fragmentParent = fragmentInput
 

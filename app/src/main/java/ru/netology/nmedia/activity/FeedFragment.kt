@@ -1,7 +1,5 @@
 package ru.netology.nmedia.activity
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,17 +11,14 @@ import androidx.navigation.fragment.findNavController
 //import androidx.navigation.findNavController  // и этот не подходит (но он использовался для перехода из активити)
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
-import ru.netology.nmedia.adapter.OnInteractionListener
-import ru.netology.nmedia.adapter.PostInteractionListener
+import ru.netology.nmedia.uiview.PostInteractionListenerImpl
 import ru.netology.nmedia.adapter.PostsAdapter
-import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.viewmodel.PostViewModel
 import ru.netology.nmedia.databinding.FragmentFeedBinding
-import ru.netology.nmedia.util.ARG_POST_ID
 
 
 class FeedFragment : Fragment() {
-//  viewModels используем теперь с аргументом, чтобы сделать общую viewModel для всех фрагментов
+    //  viewModels используем теперь с аргументом, чтобы сделать общую viewModel для всех фрагментов
     val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
     // interactionListener должен быть доступен также из фрагмента PostFragment
     // private убираем???
@@ -94,7 +89,7 @@ class FeedFragment : Fragment() {
     }
 */
 
-    private val interactionListener by lazy {  PostInteractionListener(viewModel, this)}
+    private val interactionListener by lazy { PostInteractionListenerImpl(viewModel, this) }
 
     // создаем привязку к элементам макета по первому обращению к ним
     //private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
@@ -119,6 +114,7 @@ class FeedFragment : Fragment() {
 
         return binding.root
     }
+
 
     private fun makeBinding(
         container: ViewGroup?

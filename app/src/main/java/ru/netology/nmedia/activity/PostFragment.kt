@@ -6,20 +6,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import ru.netology.nmedia.R
-import ru.netology.nmedia.adapter.PostInteractionListener
+import ru.netology.nmedia.uiview.PostInteractionListenerImpl
 import ru.netology.nmedia.adapter.PostViewHolder
-import ru.netology.nmedia.databinding.FragmentNewPostBinding
 import ru.netology.nmedia.databinding.FragmentPostBinding
-import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.dto.statisticsToString
 import ru.netology.nmedia.util.ARG_POST_ID
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 class PostFragment : Fragment() {
     //  viewModels используем теперь с аргументом, чтобы сделать общую viewModel для всех фрагментов
     private val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
-    private val interactionListener by lazy { PostInteractionListener(viewModel, this) }
+    private val interactionListener by lazy { PostInteractionListenerImpl(viewModel, this) }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
