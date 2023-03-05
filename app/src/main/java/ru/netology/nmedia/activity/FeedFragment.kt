@@ -153,7 +153,8 @@ class FeedFragment : Fragment() {
             findNavController().navigate(
                 R.id.action_feedFragment_to_newPostFragment,
                 Bundle().apply {
-                    textArg = ""  // В запускаемый фрагмент передаем пустое содержимое нового поста
+                    //textArg = ""  // В запускаемый фрагмент передаем пустое содержимое нового поста
+                    textArg = viewModel.getDraftContent()  // В запускаемый фрагмент передаем содержимое черновика
                 }
             )
 

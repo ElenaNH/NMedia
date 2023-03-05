@@ -13,7 +13,10 @@ import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewmodel.PostViewModel
 import android.view.Gravity
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.addCallback
 import ru.netology.nmedia.R
+import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.util.ARG_POST_ID
 
 //import ru.netology.nmedia.databinding.FragmentFeedBinding
@@ -24,8 +27,35 @@ class NewPostFragment : Fragment() {
         var Bundle.textArg: String? by StringArg
     }
 
+
+    // Я НЕ ПОНИМАЮ, КАК ИМЕННО "callback can be enabled"
+    // Поэтому по стрелке "назад" не происходит переход назад
+
+/*    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // This callback will only be called when MyFragment is at least Started.
+        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
+            // Handle the back button event
+            viewModel.setDraftContent(binding.editContent.text.toString())
+        }
+        // The callback can be enabled or disabled here or in the lambda
+
+    }*/
+
+
     //  viewModels используем теперь с аргументом, чтобы сделать общую viewModel для всех фрагментов
     private val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
+
+    // С этим ужасом надо что-то делать:
+    private lateinit var binding: FragmentNewPostBinding // как сделать by lazy ????
+
+    /*
+    private val backPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            viewModel.setDraftContent(binding.editContent.text.toString())
+        }
+    }*/
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -33,7 +63,8 @@ class NewPostFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 // Если удастся объявить binding через by lazy, то этот кусочек кода уйдет
-        val binding = FragmentNewPostBinding.inflate(
+        //val
+        binding = FragmentNewPostBinding.inflate(
             inflater,
             container,
             false  // false означает, что система сама добавит этот view, когда посчитает нужным

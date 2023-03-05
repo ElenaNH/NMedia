@@ -28,6 +28,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     val data = repository.getAll()
     val edited = MutableLiveData(emptyPost)
+    val draft = MutableLiveData(emptyPost)  // И не будем сохранять это в файле, ни в БД - только "in memory"
 
     fun save() {
         edited.value?.let {
@@ -56,7 +57,14 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         // Если нет ссылки, то поле ссылки должно стать пустым (даже если раньше там ссылка была)
         // Теперь скопируем пост с нашими изменениями
         edited.value = edited.value?.copy(content = text, videoLink = (match?.value ?: ""))
-//        edited.value = edited.value?.copy(content = text)
+    }
+
+    fun setDraftContent(draftContent: String) {
+        draft.value = draft.value?.copy(content = draftContent.trim())
+    }
+
+    fun getDraftContent(): String {
+        return draft.value?.content ?: ""
     }
 
     fun likeById(id: Long) = repository.likeById(id)
