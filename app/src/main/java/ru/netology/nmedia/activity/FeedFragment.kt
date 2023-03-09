@@ -96,7 +96,7 @@ class FeedFragment : Fragment() {
     private lateinit var binding: FragmentFeedBinding // как сделать by lazy ????
 
     val adapter by lazy { PostsAdapter(interactionListener) }
-
+    
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

@@ -28,20 +28,28 @@ class NewPostFragment : Fragment() {
     }
 
 
-    // Я НЕ ПОНИМАЮ, КАК ИМЕННО "callback can be enabled"
-    // Поэтому по стрелке "назад" не происходит переход назад
-
-/*    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // This callback will only be called when MyFragment is at least Started.
         val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
             // Handle the back button event
-            viewModel.setDraftContent(binding.editContent.text.toString())
+
+            // Для нового поста запоминаем черновик
+            // Даже если этот новый пост - недоделанный репост
+            //      (кстати, я не знаю, как понять, репост ли он)
+            // Но если после попытки создания поста уже заходили в редактирование другого поста,
+            // то сбрасываем черновик
+            if (viewModel.edited.value?.id ?: 0 == 0L)
+                viewModel.setDraftContent(binding.editContent.text.toString())
+            else viewModel.setDraftContent("")
+
+            // А выходим в предыдущий фрагмент в любом случае - хоть новый пост, хоть старый
+            findNavController().navigateUp()
         }
         // The callback can be enabled or disabled here or in the lambda
 
-    }*/
+    }
 
 
     //  viewModels используем теперь с аргументом, чтобы сделать общую viewModel для всех фрагментов
@@ -50,12 +58,6 @@ class NewPostFragment : Fragment() {
     // С этим ужасом надо что-то делать:
     private lateinit var binding: FragmentNewPostBinding // как сделать by lazy ????
 
-    /*
-    private val backPressedCallback = object : OnBackPressedCallback(true) {
-        override fun handleOnBackPressed() {
-            viewModel.setDraftContent(binding.editContent.text.toString())
-        }
-    }*/
 
     override fun onCreateView(
         inflater: LayoutInflater,

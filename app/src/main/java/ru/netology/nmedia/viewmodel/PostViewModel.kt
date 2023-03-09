@@ -33,6 +33,8 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     fun save() {
         edited.value?.let {
             repository.save(it)
+            // Если сохранились, то уже нет смысла в черновике (даже если сохранили другой пост)
+            setDraftContent("")
         }
         quitEditing()
     }
