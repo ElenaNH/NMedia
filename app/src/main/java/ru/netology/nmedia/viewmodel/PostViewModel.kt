@@ -23,12 +23,15 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 //    private val repository: PostRepository = PostRepositoryInMemoryImpl()
 //    private val repository: PostRepository = PostRepositorySharedPrefsImpl(application)
 //    private val repository: PostRepository = PostRepositoryFileImpl(application)
-    private val repository: PostRepository =
-        PostRepositorySQLiteImpl(AppDb.getInstance(application).postDao)
+//    private val repository: PostRepository = PostRepositorySQLiteImpl(AppDb.getInstance(application).postDao)
+    private val repository: PostRepository = PostRepositoryImpl(
+        AppDb.getInstance(context = application).postDao()
+    )
 
     val data = repository.getAll()
     val edited = MutableLiveData(emptyPost)
-    val draft = MutableLiveData(emptyPost)  // И не будем сохранять это в файле, ни в БД - только "in memory"
+    val draft =
+        MutableLiveData(emptyPost)  // И не будем сохранять это в файле, ни в БД - только "in memory"
 
     fun save() {
         edited.value?.let {
