@@ -67,7 +67,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         if (edited.value?.content == text) {
             return
         }
-        edited.value = edited.value?.copy(content = text)
+        edited.value = edited.value?.copy(content = text) // Тут мы действуем в главном потоке, поэтому присвоение
     }
 
     fun likeById(id: Long) {
