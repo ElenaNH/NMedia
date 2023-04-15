@@ -2,49 +2,64 @@ package ru.netology.nmedia.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.*
-import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.repository.*
+import ru.netology.nmedia.util.SingleLiveEvent
+import java.io.IOException
+import kotlin.concurrent.thread
 
-private val emptyPost = Post(
+private val empty = Post(
     id = 0,
-    author = "",
     content = "",
-    published = "",
+    author = "",
     likedByMe = false,
-    countLikes = 0,
-    countShare = 0,
-    countViews = 0
+    likes = 0,
+    published = ""
 )
 
-//class PostViewModel : ViewModel()
 class PostViewModel(application: Application) : AndroidViewModel(application) {
-    // упрощённый вариант // Пока сохраним упрощенный код, хоть так обычно и не делается
-//    private val repository: PostRepository = PostRepositorySQLiteImpl(AppDb.getInstance(application).postDao)
-    private val repository: PostRepository = PostRepositoryImpl(
-        AppDb.getInstance(context = application).postDao()
-    )
+    // упрощённый вариант
+    private val repository: PostRepository = PostRepositoryImpl()
+    private val _data = MutableLiveData(FeedModel())
+    val data: LiveData<FeedModel>
+        get() = _data
+    val edited = MutableLiveData(empty)
+    private val _postCreated = SingleLiveEvent<Unit>()
+    val postCreated: LiveData<Unit>
+        get() = _postCreated
 
-    val data = repository.getAll()
-    val edited = MutableLiveData(emptyPost)
-    val draft =
-        MutableLiveData(emptyPost)  // И не будем сохранять это в файле, ни в БД - только "in memory"
+    init {
+        loadPosts()
+    }
+
+    fun loadPosts() {
+        thread {
+            // Начинаем загрузку
+            _data.postValue(FeedModel(loading = true))
+            try {
+                // Данные успешно получены
+                val posts = repository.getAll()
+                FeedModel(posts = posts, empty = posts.isEmpty())
+            } catch (e: IOException) {
+                // Получена ошибка
+                FeedModel(error = true)
+            }.also(_data::postValue)    // Аналог _data.postValue(Рассчитанная_в_блоке_FeedModel)
+        }
+    }
 
     fun save() {
         edited.value?.let {
-            repository.save(it)
-            // Если сохранились, то уже нет смысла в черновике (даже если сохранили другой пост)
-            setDraftContent("")
+            thread {
+                repository.save(it)
+                _postCreated.postValue(Unit) // Смысл выводить сообщение 1 раз, если сохранение возможно повторное?
+            }
         }
-        quitEditing()
+        edited.value = empty
     }
 
-    fun startEditing(post: Post) {
+    fun edit(post: Post) {
         edited.value = post
-    }
-
-    fun quitEditing() {
-        edited.value = emptyPost
     }
 
     fun changeContent(content: String) {
@@ -52,25 +67,49 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         if (edited.value?.content == text) {
             return
         }
-        // Сначала проверим наличие ссылки внутри поста (возьмем первую подходящую)
-        val regex = "(https?://)?([\\w-]{1,32})(\\.[\\w-]{1,32})+[^\\s@]*".toRegex()
-        val match = regex.find(content)
-        // Если ссылка есть в тексте, то поместим ее в отдельное поле
-        // Если нет ссылки, то поле ссылки должно стать пустым (даже если раньше там ссылка была)
-        // Теперь скопируем пост с нашими изменениями
-        edited.value = edited.value?.copy(content = text, videoLink = (match?.value ?: ""))
+        edited.value = edited.value?.copy(content = text)
     }
 
-    fun setDraftContent(draftContent: String) {
-        draft.value = draft.value?.copy(content = draftContent.trim())
+    fun likeById(id: Long) {
+        thread {
+            //repository.likeById(id)
+
+            // Оптимистичная модель
+            val old = _data.value?.posts.orEmpty()
+            _data.postValue(
+                _data.value?.copy(posts = _data.value?.posts.orEmpty()
+                    .map { post ->
+                        if (post.id == id) post.copy(
+                            likedByMe = !post.likedByMe,
+                            likes = post.likes + if (post.likedByMe) -1 else 1
+                        )
+                        else post
+                    }
+                )
+            )
+            try {
+                repository.likeById(id)
+            } catch (e: IOException) {
+                _data.postValue(_data.value?.copy(posts = old))
+            }
+            // завершение обработки лайка
+        }
     }
 
-    fun getDraftContent(): String {
-        return draft.value?.content ?: ""
+    fun removeById(id: Long) {
+        thread {
+            // Оптимистичная модель
+            val old = _data.value?.posts.orEmpty()
+            _data.postValue(
+                _data.value?.copy(posts = _data.value?.posts.orEmpty()
+                    .filter { it.id != id }
+                )
+            )
+            try {
+                repository.removeById(id)
+            } catch (e: IOException) {
+                _data.postValue(_data.value?.copy(posts = old))
+            }
+        }
     }
-
-    fun likeById(id: Long) = repository.likeById(id)
-    fun shareById(id: Long) = repository.shareById(id)
-    fun removeById(id: Long) = repository.removeById(id)
-
 }
