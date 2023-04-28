@@ -21,20 +21,21 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                 return@let
             }
 
-            val text =
-                it.getStringExtra(Intent.EXTRA_TEXT) // Проверяем, что передано извне (чем с нами "поделились")
-            if (text?.isNotBlank() != true) {    // Можно ли isNullOrBlank()???
-                return@let  // Если никто ничего нам не передал, то выходим
+            val text = it.getStringExtra(Intent.EXTRA_TEXT)
+            if (text?.isNotBlank() != true) {
+                return@let
             }
-            intent.removeExtra(Intent.EXTRA_TEXT)   // Удаляем то, что было передано извне
-            // Поскольку имеем данные извне, то запустим переход ко второму фрагменту newPostFragment
-            findNavController(R.id.nav_host_fragment).navigate(
-                R.id.action_feedFragment_to_newPostFragment,
-                Bundle().apply {
-                    textArg = text  // В запускаемый фрагмент передаем полученные извне данные
-                }
-            )
+
+            intent.removeExtra(Intent.EXTRA_TEXT)
+            findNavController(R.id.nav_host_fragment)
+                .navigate(
+                    R.id.action_feedFragment_to_newPostFragment,
+                    Bundle().apply {
+                        textArg = text
+                    }
+                )
         }
+
         checkGoogleApiAvailability()
     }
 
@@ -56,5 +57,4 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
             println(it)
         }
     }
-
 }
