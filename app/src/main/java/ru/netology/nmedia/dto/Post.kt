@@ -19,12 +19,18 @@ fun Long.statisticsToString(): String {
     }
 }
 
+/*ВНИМАНИЕ! поле likes должно называться именно так,
+* чтобы работало преобразование gson.fromJson в объект Post из текста, пришедшего с сервера
+* НО!!!
+* Правильно было использовать PostEntity, который конвертировать далее через toDto*/
 data class Post(
     val id: Long,
     val author: String,
     val content: String,
+    val videoLink: String? = null,
     val published: String,
-    val likedByMe: Boolean,
-    val likes: Int = 0,
+    val likedByMe: Boolean = false,
+    val likes: Int,
+    val countShare: Int,
+    val countViews: Int
 )
-
