@@ -7,6 +7,9 @@ import androidx.room.RoomDatabase
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.entity.PostEntity
 
+// Объявляем AppDb - абстрактный класс
+// Его имплементацию сгенерит библиотека ROOM сама
+// Мы только должны указать в аннотации все Entity-классы (структуры всех таблиц)
 @Database(entities = [PostEntity::class], version = 1)
 abstract class AppDb : RoomDatabase() {
     abstract fun postDao(): PostDao
@@ -28,3 +31,4 @@ abstract class AppDb : RoomDatabase() {
                 .build()
     }
 }
+
