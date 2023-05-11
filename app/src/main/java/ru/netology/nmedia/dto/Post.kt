@@ -33,4 +33,11 @@ data class Post(
     val likes: Int,
     val countShare: Int,
     val countViews: Int
-)
+) {
+    fun avatarFileName() = when (author) {
+        "Нетология", "Netology" -> "netology.jpg"
+        "Сбер" -> "sber.jpg"
+        "Тинькофф", "Tinkoff" -> "tcs.jpg"
+        else -> ""
+    }
+}

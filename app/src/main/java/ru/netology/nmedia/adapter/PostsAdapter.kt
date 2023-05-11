@@ -9,6 +9,9 @@ import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.statisticsToString   // при этом dto.Post импортируется через PostViewModel и связанный с ней Repository
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.squareup.picasso.Picasso
 
 interface OnInteractionListener {
     fun onLike(post: Post) {}
@@ -97,15 +100,26 @@ class PostViewHolder(
                     }
                 }.show()
             }
+
+            // И после всех привязок начинаем, наконец, грузить картинку
+            val url = "http://10.0.2.2:9999/avatars/${post.avatarFileName()}"
+            //val askAvatar =
+            Glide.with(binding.imgAvatar)
+                .load(url)
+                .circleCrop()
+                .placeholder(R.drawable.ic_loading_100dp)
+                .error(R.drawable.ic_error_100dp)
+                .timeout(10_000)
+                .into(binding.imgAvatar)
+
+//            Picasso.get()
+//                .load(url)
+//                .error(R.drawable.ic_error_100dp)
+//                .into(binding.image);
+
         }
     }
 }
 
 
-/*// Сначала проверим наличие ссылки внутри поста (возьмем первую подходящую)
-            val regex = "(https?://)?([\\w-]{1,32})(\\.[\\w-]{1,32})+[^\\s@]*".toRegex()
-            val match = regex.find(post.content)
-            // Если ссылка есть в тексте, то поместим ее в отдельное поле
-            // Если нет ссылки, то поле ссылки будет пустым
-            if (match?.value == null) videoLinkPic.setImageDrawable(null)
-            else videoLinkPic.setImageResource(R.mipmap.ic_banner_foreground)*/
+
