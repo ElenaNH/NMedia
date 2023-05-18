@@ -13,12 +13,14 @@ import kotlin.concurrent.thread
 private val emptyPost = Post(
     id = 0,
     author = currentAuthor(),
+    authorAvatar = "",
     content = "",
     published = "",
     likedByMe = false,
     likes = 0,
     countShare = 0,
-    countViews = 0
+    countViews = 0,
+    attachment = null
 )
 
 private fun currentAuthor(): String = "Me"  // Надо вычислять текущего автора
