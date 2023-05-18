@@ -11,7 +11,7 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.statisticsToString   // при этом dto.Post импортируется через PostViewModel и связанный с ней Repository
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.squareup.picasso.Picasso
+//import com.squareup.picasso.Picasso
 import ru.netology.nmedia.enumeration.AttachmentType
 
 interface OnInteractionListener {
