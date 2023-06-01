@@ -2,7 +2,6 @@ package ru.netology.nmedia.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.*
-import ru.netology.nmedia.activity.FeedFragment
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.enumeration.PostActionType
 import ru.netology.nmedia.model.FeedModel
@@ -75,22 +74,25 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             _postCreateLoading.value = true
             repository.save(it, object : PostRepository.Callback<Post> {
                 override fun onSuccess(posts: Post) {
+
                     _postCreated.postValue(Unit) // Передаем сообщение, к-е обрабатывается однократно
                     // Если сохранились, то уже нет смысла в черновике (даже если сохранили другой пост)
                     _postCreateLoading.postValue(false) // Конец загрузки
                     postDraftContent("") // Чистим черновик, т.к. успешно вернулся результат и вызван CallBack
-                    _postActionSucceed.postValue(PostActionType.ACTION_POST_CREATION)
+                    _postActionSucceed.postValue(PostActionType.ACTION_POST_SAVING)
+                    quitEditing() // сбрасываем редактирование только при успешной записи
                 }
 
                 override fun onError(e: Exception) {
                     // Всплывающее сообщение об ошибке записи
-                    _postActionFailed.postValue(PostActionType.ACTION_POST_CREATION)
-
+                    _postActionFailed.postValue(PostActionType.ACTION_POST_SAVING)
+                    // выход возможен либо при успехе, либо по кнопке "назад"
+                    // отсюда выход в предыдущий фрагмент не делаем
                 }
             })
         }
 
-        quitEditing()
+        //quitEditing()
     }
 
 
@@ -175,6 +177,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     fun startEditing(post: Post) {
         edited.value = post
+    }
+
+    fun continueEditing() {
+        _postCreateLoading.value = false    // Сбрасываем статус загрузки поста
     }
 
     fun quitEditing() {

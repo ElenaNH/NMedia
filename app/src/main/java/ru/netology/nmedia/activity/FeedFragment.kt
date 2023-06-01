@@ -78,35 +78,11 @@ class FeedFragment : Fragment() {
         }
         // Подписка на однократную ошибку
         viewModel.postActionFailed.observe(viewLifecycleOwner) { // Сообщаем однократно
-            val toastInfo = when (it) {
-                PostActionType.ACTION_POST_CREATION -> getString(R.string.error_post_creation)
-                PostActionType.ACTION_POST_LIKE_CHANGE -> getString(R.string.error_post_like_change)
-                PostActionType.ACTION_POST_DELETION -> getString(R.string.error_post_deletion)
-            }
-            // Всплывающее сообщение
-            val warnToast = Toast.makeText(
-                this.activity,
-                toastInfo,
-                Toast.LENGTH_SHORT
-            )
-            warnToast.setGravity(Gravity.CENTER_VERTICAL, 0, 0)
-            warnToast.show()
+            this.whenPostActionFailed(viewModel, it)
         }
         // Подписка на однократный успех
         viewModel.postActionSucceed.observe(viewLifecycleOwner) { // Сообщаем однократно
-            val toastInfo = when (it) {
-                PostActionType.ACTION_POST_CREATION -> getString(R.string.succeed_post_creation)
-                PostActionType.ACTION_POST_LIKE_CHANGE -> getString(R.string.succeed_post_like_change)
-                PostActionType.ACTION_POST_DELETION -> getString(R.string.succeed_post_deletion)
-            }
-            // Всплывающее сообщение
-            val warnToast = Toast.makeText(
-                this.activity,
-                toastInfo,
-                Toast.LENGTH_SHORT
-            )
-            warnToast.setGravity(Gravity.CENTER_VERTICAL, 0, 0)
-            warnToast.show()
+            this.whenPostActionSucceed(viewModel, it)
         }
 
     }
