@@ -14,11 +14,8 @@ import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.viewmodel.PostViewModel
 import android.view.Gravity
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import ru.netology.nmedia.R
-import ru.netology.nmedia.databinding.FragmentFeedBinding
-import ru.netology.nmedia.util.ARG_POST_ID
 
 //import ru.netology.nmedia.databinding.FragmentFeedBinding
 
@@ -74,6 +71,9 @@ class NewPostFragment : Fragment() {
         arguments?.textArg
             ?.let(binding.editContent::setText) // Задаем текст поста из передаточного элемента textArg
 
+        // Подписки этого фрагмента
+        subscribe()
+
         binding.btnOk.setOnClickListener {
 
             if (binding.editContent.text.isNullOrBlank()) {
@@ -92,22 +92,34 @@ class NewPostFragment : Fragment() {
                 viewModel.changeContent(binding.editContent.text.toString())
                 viewModel.save()
                 AndroidUtils.hideKeyboard(requireView())
-                // findNavController().navigateUp()  // Тут нельзя выходить из фрагмента, т.к. еще не загружены посты
-                // Теперь запись и загрузка постов разделены (ранее не требовалась отдельная загрузка с сервера)
-                viewModel.postCreated.observe(viewLifecycleOwner) { // Загружаем однократно
-                    viewModel.loadPosts()
-                    // Закрытие текущего фрагмента (переход к нижележащему в стеке)
-                    findNavController().navigateUp()
-                }
-                // Чтобы нельзя было вкинуть пост много раз, блокируем кнопку, пока пост не запишется
-                viewModel.postCreateLoading.observe(viewLifecycleOwner) {
-                    binding.btnOk.isEnabled = !it
-                }
+//                subscribeActions()    // Выносим подписки
 
             }
 
         }
         return binding.root
+    }
+
+    private fun subscribe() {
+        // Теперь запись и загрузка постов разделены (ранее не требовалась отдельная загрузка с сервера)
+        viewModel.postCreated.observe(viewLifecycleOwner) { // Загружаем однократно
+            viewModel.loadPosts()
+            // Закрытие текущего фрагмента (переход к нижележащему в стеке)
+            findNavController().navigateUp()
+        }
+        // Чтобы нельзя было вкинуть пост много раз, блокируем кнопку, пока пост не запишется
+        viewModel.postCreateLoading.observe(viewLifecycleOwner) {
+            binding.btnOk.isEnabled = !it
+        }
+        // !!!!! Если ошибка произошла в этом фрагменте до его закрытия, то
+        // Подписка на однократную ошибку
+        viewModel.postActionFailed.observe(viewLifecycleOwner) {
+            this.whenPostActionFailed(viewModel, it)
+        }
+        // Подписка на однократный успех
+        viewModel.postActionSucceed.observe(viewLifecycleOwner) { // Сообщаем однократно
+            this.whenPostActionSucceed(viewModel, it)
+        }
     }
 
     // Попробуем вынести создание binding
