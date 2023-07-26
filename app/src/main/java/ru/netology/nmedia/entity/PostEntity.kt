@@ -1,6 +1,7 @@
 package ru.netology.nmedia.entity
 
 import androidx.room.*
+import retrofit2.http.POST
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.enumeration.AttachmentType
@@ -79,3 +80,7 @@ data class AttachmentEmbeddable(
 }
 
 
+// Функции расширения для списков
+
+fun List<PostEntity>.toDto(): List<Post> = map(PostEntity::toDto)
+fun List<Post>.fromDto(): List<PostEntity> = map(PostEntity::fromDto)

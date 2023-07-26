@@ -2,9 +2,12 @@ package ru.netology.nmedia.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.*
+import kotlinx.coroutines.launch
+import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.enumeration.PostActionType
 import ru.netology.nmedia.model.FeedModel
+import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.repository.*
 import ru.netology.nmedia.util.SingleLiveEvent
 
@@ -29,10 +32,13 @@ private fun currentAuthor(): String = "Me"  // Надо вычислять те�
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
     // упрощённый вариант
-    private val repository: PostRepository = PostRepositoryImpl()
-    private val _data = MutableLiveData(FeedModel())
-    val data: LiveData<FeedModel>
-        get() = _data
+    private val repository: PostRepository =
+        PostRepositoryImpl(AppDb.getInstance(application).postDao())
+    private val _dataState = MutableLiveData(FeedModelState())
+    val data: LiveData<FeedModel> =
+        repository.data.map { FeedModel(posts = it, empty = it.isEmpty()) }
+    val dataState: LiveData<FeedModelState>
+        get() = _dataState
     val edited = MutableLiveData(emptyPost)
     val draft = MutableLiveData(emptyPost)  // И будем сохранять это только "in memory"
     private val _postCreateLoading = MutableLiveData<Boolean>()
@@ -53,24 +59,29 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         loadPosts()
     }
 
-    fun loadPosts() {
+    fun loadPosts() = refreshOrLoadPosts(refreshingState = false)
 
-        // Начинаем загрузку
-        _data.value = FeedModel(loading = true) // Аналог _data.setValue(FeedModel(loading = true))
-        repository.getAllAsync(object : PostRepository.Callback<List<Post>> {
-            override fun onSuccess(posts: List<Post>) {
-                _data.value = FeedModel(posts = posts, empty = posts.isEmpty())
-            }
+    fun refresh() = refreshOrLoadPosts(refreshingState = true)
 
-            override fun onError(e: Exception) {
-                _data.value = FeedModel(error = true)
-            }
-        })
+    private fun refreshOrLoadPosts(refreshingState: Boolean) = viewModelScope.launch {
+        if (refreshingState) {
+            _dataState.value = FeedModelState(refreshing = true)  // Начинаем обновление
+        } else {
+            _dataState.value = FeedModelState(loading = true)  // Начинаем загрузку
+        }
+        try {
+            repository.getAll()
+            _dataState.value = FeedModelState()     // При успехе
+        } catch (e: Exception) {
+            _dataState.value = FeedModelState(error = true)  // При ошибке
+        }
     }
 
     fun save() {
+        // TODO
+        // ДЗ
 
-        edited.value?.let {
+        /*edited.value?.let {
             _postCreateLoading.value = true
             repository.save(it, object : PostRepository.Callback<Post> {
                 override fun onSuccess(posts: Post) {
@@ -90,7 +101,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                     // отсюда выход в предыдущий фрагмент не делаем
                 }
             })
-        }
+        }*/
 
         //quitEditing()
     }
@@ -106,6 +117,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun likeById(id: Long) {
+        // TODO
+        // ДЗ
+
+        /*
         // оптимистичная модель
         val old = _data.value?.posts.orEmpty()
         var ratedPost: Post = emptyPost
@@ -127,7 +142,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         repository.likeById(id, object : PostRepository.Callback<Post> {
             override fun onSuccess(posts: Post) {
                 //if (this is FeedFragment) {
-                    _postActionSucceed.postValue(PostActionType.ACTION_POST_LIKE_CHANGE)
+                _postActionSucceed.postValue(PostActionType.ACTION_POST_LIKE_CHANGE)
                 //}
                 // Ничего не делаем, потому что мы уже все сделали до вызова в расчете на успех
             }
@@ -139,7 +154,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 // Раз не ставится лайк, то вернемся к предыдущим данным
                 _data.postValue(_data.value?.copy(posts = old))
             }
-        })
+        })*/
 
 
         // завершение обработки лайка
@@ -152,25 +167,35 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     fun removeById(id: Long) {
         // TODO
-        // Оптимистичная модель - обновляемся до получения ответа от сервера
-        val old = _data.value?.posts.orEmpty()
-        _data.value =
-            _data.value?.copy(posts = _data.value?.posts.orEmpty() // Пока еще главный поток
-                .filter { it.id != id }
-            )
-        repository.removeById(id, object : PostRepository.Callback<Unit> {
-            override fun onSuccess(posts: Unit) {
-                super.onSuccess(posts)
-                _postActionSucceed.postValue(PostActionType.ACTION_POST_DELETION)
-                // Ничего не делаем, потому что мы уже все сделали до вызова в расчете на успех
+
+        // Оптимистичная модель - обновляем БД и экран до получения ответа от сервера
+
+        val oldPosts = data.value?.posts.orEmpty()
+
+        viewModelScope.launch {
+            try {
+                repository.removeById(id)
+            } catch (e: Exception) {
+                // Тут нужно:
+                // 1) вывести ошибку
+                _dataState.value = FeedModelState(error = true)
+                            // однократную ошибку выводили раньше
+                            // _postActionFailed.postValue(PostActionType.ACTION_POST_DELETION)
+                            // но теперь состояние модели очень быстро изменится на "loading",
+                            // так что ошибка и без спец.приемов отобразится однократно
+
+                // 2) вернуть недоудаленный пост обратно
+                // (запросим все посты с сервера, т.к. система отлажена)
+                // При этом статус ошибки пропадет, а появится статус загрузки
+                try {
+                    repository.getAll()
+                    _dataState.value = FeedModelState()     // При успехе
+                } catch (e: Exception) {
+                    _dataState.value = FeedModelState(error = true)  // При ошибке
+                }
             }
 
-            override fun onError(e: Exception) {
-                super.onError(e)
-                _postActionFailed.postValue(PostActionType.ACTION_POST_DELETION)
-                _data.postValue(_data.value?.copy(posts = old))
-            }
-        })
+        }
 
     }
 

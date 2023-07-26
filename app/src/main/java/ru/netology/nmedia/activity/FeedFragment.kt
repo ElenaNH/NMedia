@@ -20,6 +20,7 @@ import android.view.Gravity
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
+import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.enumeration.PostActionType
 
 
@@ -70,12 +71,20 @@ class FeedFragment : Fragment() {
         // Подписки:
 
         // Подписка на FeedModel - список сообщений и состояние этого списка
-        viewModel.data.observe(viewLifecycleOwner) { state ->
-            adapter.submitList(state.posts)
+        viewModel.dataState.observe(viewLifecycleOwner) { state ->
             binding.progress.isVisible = state.loading
-            binding.errorGroup.isVisible = state.error
-            binding.emptyText.isVisible = state.empty
+            if (state.error) {
+                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.retry_loading) {viewModel.loadPosts()}
+                    .show()
+            }
+            binding.refreshLayout.isRefreshing = state.refreshing
         }
+        viewModel.data.observe(viewLifecycleOwner) { data ->
+            adapter.submitList(data.posts)
+            binding.emptyText.isVisible = data.empty
+        }
+
         // Подписка на однократную ошибку
         viewModel.postActionFailed.observe(viewLifecycleOwner) { // Сообщаем однократно
             this.whenPostActionFailed(viewModel, it)
@@ -90,13 +99,6 @@ class FeedFragment : Fragment() {
     private fun setListeners() {
         // Обработчики кликов
 
-        binding.retryButton.setOnClickListener {
-            viewModel.loadPosts()
-        }
-
-        // Пока что все обработчики либо в адаптере, либо в другом обработчике,
-        // fab не получилось сделать безопасно (не знаю, как сделать by lazy с аргументами)
-
         binding.fab.setOnClickListener {
             // Запуск фрагмента NewPostFragment
             findNavController().navigate(
@@ -108,6 +110,10 @@ class FeedFragment : Fragment() {
                 }
             )
 
+        }
+
+        binding.refreshLayout.setOnRefreshListener {
+            viewModel.refresh()
         }
 
     }
