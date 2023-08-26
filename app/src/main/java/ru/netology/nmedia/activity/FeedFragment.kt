@@ -75,7 +75,7 @@ class FeedFragment : Fragment() {
             binding.progress.isVisible = state.loading
             if (state.error) {
                 Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
-                    .setAction(R.string.retry_loading) {viewModel.loadPosts()}
+                    .setAction(R.string.retry_loading) { viewModel.loadPosts() }
                     .show()
             }
             binding.refreshLayout.isRefreshing = state.refreshing
@@ -87,11 +87,10 @@ class FeedFragment : Fragment() {
 
         // Подписка на однократную ошибку
         viewModel.postActionFailed.observe(viewLifecycleOwner) { // Сообщаем однократно
-            this.whenPostActionFailed(viewModel, it)
-        }
-        // Подписка на однократный успех
-        viewModel.postActionSucceed.observe(viewLifecycleOwner) { // Сообщаем однократно
-            this.whenPostActionSucceed(viewModel, it)
+            whenPostActionFailed(binding.root, viewModel, it)
+            if (it == PostActionType.ACTION_POST_LIKE_CHANGE) {
+                adapter.submitList(viewModel.data.value?.posts)
+            }
         }
 
     }

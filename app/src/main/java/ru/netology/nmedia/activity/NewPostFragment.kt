@@ -16,6 +16,7 @@ import android.view.Gravity
 import android.widget.Toast
 import androidx.activity.addCallback
 import ru.netology.nmedia.R
+import ru.netology.nmedia.util.ConsolePrinter
 
 //import ru.netology.nmedia.databinding.FragmentFeedBinding
 
@@ -101,24 +102,23 @@ class NewPostFragment : Fragment() {
     }
 
     private fun subscribe() {
-        // Теперь запись и загрузка постов разделены (ранее не требовалась отдельная загрузка с сервера)
-        viewModel.postCreated.observe(viewLifecycleOwner) { // Загружаем однократно
-            viewModel.loadPosts()
+        // Отдельно выходим из фрагмента, и отдельно обновляем посты
+        viewModel.postSavingStarted.observe(viewLifecycleOwner) { // Выходим однократно
+            ConsolePrinter.printText("postSavingStarted observe: Before navigation up...")
             // Закрытие текущего фрагмента (переход к нижележащему в стеке)
             findNavController().navigateUp()
+            ConsolePrinter.printText("After navigation up...")
         }
-        // Чтобы нельзя было вкинуть пост много раз, блокируем кнопку, пока пост не запишется
-        viewModel.postCreateLoading.observe(viewLifecycleOwner) {
-            binding.btnOk.isEnabled = !it
+        viewModel.postCreated.observe(viewLifecycleOwner) { // Загружаем однократно
+            ConsolePrinter.printText("postCreated observe: Before loading posts...")
+            viewModel.loadPosts()
+            ConsolePrinter.printText("After loading posts...")
         }
-        // !!!!! Если ошибка произошла в этом фрагменте до его закрытия, то
+
+        // !!!!! Если ошибка произошла в этом фрагменте до его закрытия, то postActionFailed
         // Подписка на однократную ошибку
         viewModel.postActionFailed.observe(viewLifecycleOwner) {
-            this.whenPostActionFailed(viewModel, it)
-        }
-        // Подписка на однократный успех
-        viewModel.postActionSucceed.observe(viewLifecycleOwner) { // Сообщаем однократно
-            this.whenPostActionSucceed(viewModel, it)
+            whenPostActionFailed(binding.root, viewModel, it)
         }
     }
 
