@@ -35,7 +35,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
 
-        <!-- Далее идет разметка летны постов -->
+        <!-- Далее идет разметка ленты постов -->
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/refreshLayout"
             android:layout_width="match_parent"
@@ -61,5 +61,17 @@
         android:layout_margin="@dimen/fab_margin"
         android:contentDescription="@string/add_post"
         app:srcCompat="@drawable/ic_add" /> <!--android:clickable="true"-->
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/some_unread"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginHorizontal="@dimen/fab_margin"
+        android:layout_marginVertical="@dimen/fab_margin"
+        android:contentDescription="@string/new_posts"
+        android:visibility="invisible"
+        app:srcCompat="@drawable/ic_unread" />
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -52,6 +52,7 @@ data class Post(
     val attachment: Attachment? = null,
     val unconfirmed: Int = 0, // Все пришедшее с сервера будет "confirmed"
     val unsaved: Int = 0, // Все пришедшее с сервера будет "saved" (ведь на сервере нет этого поля)
+    val hidden: Int,
 ) {
 
  companion object {
@@ -69,7 +70,8 @@ data class Post(
                 attachment = null,
                 unconfirmed = 1,
                 unsaved = 1,
-            )
+                hidden = 0,
+            )       // Новый пустой пост должен быть видим
         }
     }
 

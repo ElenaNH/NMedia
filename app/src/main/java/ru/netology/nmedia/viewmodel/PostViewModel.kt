@@ -6,8 +6,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.findFragment
 import androidx.lifecycle.*
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.switchMap
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import ru.netology.nmedia.R
@@ -30,12 +34,24 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     // упрощённый вариант
     private val repository: PostRepository =
         PostRepositoryImpl(AppDb.getInstance(application).postDao())
-    private val _dataState = MutableLiveData(FeedModelState())
+
     val data: LiveData<FeedModel> =
-        repository.data.map { FeedModel(posts = it, empty = it.isEmpty()) }
+        repository.data
+            .map { FeedModel(posts = it, empty = it.isEmpty()) }
+            .asLiveData(Dispatchers.Default)
+
     val edited = MutableLiveData(emptyPost)
     val draft = MutableLiveData(emptyPost)  // И будем сохранять это только "in memory"
 
+    val newerCount: LiveData<Int> = data.switchMap {
+        repository.getNewerCount(it.posts
+            .filter { it.unconfirmed == 0 }
+            .firstOrNull()?.id ?: 0L
+        )
+            .asLiveData(Dispatchers.Default)
+    }
+
+    private val _dataState = MutableLiveData(FeedModelState())
     val dataState: LiveData<FeedModelState>
         get() = _dataState
     private val _postCreated = SingleLiveEvent<Unit>()
@@ -101,34 +117,34 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         // После этого уже пост точно подтвержден, так что обновляем его целиком
 
         viewModelScope.launch {
-            supervisorScope {
-                async {
-                    // Эта корутина будет отвечать за запись - ее не ждем
+            //supervisorScope {
+            async {
+                // Эта корутина будет отвечать за запись - ее не ждем
 
-                    try {
-                        edited.value?.let {
-                            repository.save(it)
-                            _postCreated.value = Unit  // Однократное событие
+                try {
+                    edited.value?.let {
+                        repository.save(it)
+                        _postCreated.value = Unit  // Однократное событие
 
-                            ConsolePrinter.printText("MY SAVING TRY FINISHED")
-                        }
-                    } catch (e: Exception) {
-                        ConsolePrinter.printText("MY SAVING CATCH STARTED: ${e.message.toString()}")
-                        // Тут надо просто оставить запись в локальной БД в неподтвержденном статусе
-                        _postActionFailed.value = PostActionType.ACTION_POST_SAVING
+                        ConsolePrinter.printText("MY SAVING TRY FINISHED")
                     }
-                }
-
-                launch {
-                    // Эта корутина будет отвечать за выход из режима редактирования
-
-                    _postSavingStarted.value = Unit // Однократное событие
-                    quitEditing() // сбрасываем редактирование при попытке записи (заменим на emptyPost)
-                    // Черновик сбросим, т.к. у нас будет либо подтвержденный, либо неподтвержденный пост
-                    postDraftContent("")
-
+                } catch (e: Exception) {
+                    ConsolePrinter.printText("MY SAVING CATCH STARTED: ${e.message.toString()}")
+                    // Тут надо просто оставить запись в локальной БД в неподтвержденном статусе
+                    _postActionFailed.value = PostActionType.ACTION_POST_SAVING
                 }
             }
+
+            launch {
+                // Эта корутина будет отвечать за выход из режима редактирования
+
+                _postSavingStarted.value = Unit // Однократное событие
+                quitEditing() // сбрасываем редактирование при попытке записи (заменим на emptyPost)
+                // Черновик сбросим, т.к. у нас будет либо подтвержденный, либо неподтвержденный пост
+                postDraftContent("")
+
+            }
+            //}
         }
 
     }
@@ -178,6 +194,14 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
+    fun setAllVisible() {
+        viewModelScope.launch {
+            repository.setAllVisible()
+        }
+    }
+
+
+    //-------------------------------------------------
     fun startEditing(post: Post) {
         edited.value = post
     }

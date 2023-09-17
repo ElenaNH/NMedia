@@ -1,13 +1,12 @@
 package ru.netology.nmedia.repository
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.map
+import kotlinx.coroutines.flow.*
+//import kotlinx.coroutines.flow.Flow
+//import kotlinx.coroutines.flow.flow
+//import kotlinx.coroutines.flow.flowOn
+//import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.newFixedThreadPoolContext
-import kotlinx.coroutines.supervisorScope
-import retrofit2.Call
-import retrofit2.Callback
+import kotlinx.coroutines.Dispatchers
 import retrofit2.Response
 import ru.netology.nmedia.api.PostsApi
 import ru.netology.nmedia.dao.PostDao
@@ -20,13 +19,13 @@ import ru.netology.nmedia.util.ConsolePrinter
 //import java.util.concurrent.TimeUnit
 //import kotlin.Exception
 import java.lang.RuntimeException
+import ru.netology.nmedia.error.ApiError
 
 
 class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
-    override val data: LiveData<List<Post>> = postDao.getAll().map {
-        it.toDto()
-    }
-    // override val data: LiveData<List<Post>> = postDao.getAll().map { it.map(PostEntity::toDto) }
+    override val data: Flow<List<Post>> = postDao.getAll()
+        .map { it.toDto() }  //.map { it.map { entity -> entity.copy(hidden = 0) }.toDto() } - скрытых мы не достанем оттуда
+        .flowOn(Dispatchers.Default)
 
 
     override suspend fun getAll() {
@@ -52,7 +51,12 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
             .plus(waitedDeleteEntities.map { it.id })
             .toSet()
         // .toList()
-        val postEntitiesForInserting = posts.fromDto().filterNot { excludeIds.contains(it.id) }
+
+        val postEntitiesForInserting = posts.fromDto()
+            .filterNot { excludeIds.contains(it.id) }
+            .map { entity ->
+                entity.copy(hidden = 0)
+            } // Если была команда на полное обновление, то ничего не скрываем, все visible
 
         // Обновим только то, что не нужно прежде проталкивать на сервер
         if (postEntitiesForInserting.count() > 0)
@@ -91,8 +95,11 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
         // Не обрабатываем ошибку, а вылетаем наверх
         ConsolePrinter.printText("pushAllDeleted started")
         postDao.getAllDeleted()
-            .forEach {entity ->
-                removeById(entity.unconfirmed, entity.id) // Удаленный энтити преобразовался бы в пустой пост, а нам нужен непустой
+            .forEach { entity ->
+                removeById(
+                    entity.unconfirmed,
+                    entity.id
+                ) // Удаленный энтити преобразовался бы в пустой пост, а нам нужен непустой
             }
         ConsolePrinter.printText("pushAllDeleted finished")
     }
@@ -116,7 +123,7 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
         // Будем выбрасывать исключение во вьюмодель только после некоторой обработки
         var response: Response<Post>? = null
         try {
-            // Затем отправляем запрос удаления на сервер
+            // Затем отправляем запрос сохранения на сервер
             response = PostsApi.retrofitService.save(
                 if (unconfirmedPost) post.copy(
                     id = 0,
@@ -258,5 +265,53 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
         TODO("Not yet implemented")
     }
 
+    override fun getNewerCount(id: Long): Flow<Int> = flow<Int> {
+        // Пока я не типизировала интом (flow<Int>), справа отображалось {this:FlowCollector<Nothing>
+        // Почему??? Ведь в примерах было просто flow!!!
+        while (true) {
+            delay(10_000L)
+            var response: Response<List<Post>>
+            try {
+                response = PostsApi.retrofitService.getNewer(id)
+                ConsolePrinter.printText("HAVE GOT NEWER RESPONSE")
+////
+                if (!response.isSuccessful) {
+                    throw ApiError(response.code(), response.message())
+                }
+                val body = response.body() ?: throw ApiError(response.code(), response.message())
+                //val doEmit = (data.count() != 0) - ЭТО НЕЛЬЗЯ БЫЛО ДЕЛАТЬ!!!
+                val maxVisibleLimit = postDao.maxConfirmedVisible() ?: 0L
+                // К пустому списку добавляем посты сразу // emit(body.size) ПРИ ЭТОМ НЕ ДЕЛАЕМ, т.к. все отобразили
+                // воспользуемся, что если есть хоть один подтвержденный пост, то maxVisible > 0
+                val hiddenPlan = if (maxVisibleLimit > 0L) 1 else 0
+                ConsolePrinter.printText("getNewerCount - maxVisibleLimit = $maxVisibleLimit & hiddenPlan = $hiddenPlan")
+                var doEmit: Boolean = true
+                postDao.insert(body.fromDto().map {
+                    it.copy(
+                        hidden = if (hiddenPlan == 0) 0
+                        else if (it.id <= maxVisibleLimit) 0
+                        else 1
+                    ) // Чтобы ранее показанные не скрывались, но обновление происходило
+                    // Вдруг мы уже отобразили ранее скрытые, пока ждали ответ сервера
+                })
+                ConsolePrinter.printText("getNewerCount = ${body.size} (inserted)")
+                if ((hiddenPlan != 0) && (body.size > 0))
+                    emit(body.size) // Если пришедшие посты видимы, то не будет эмиссии
+            } catch (e: Exception) {
+                ConsolePrinter.printText("HAVE NOT GOT NEWER RESPONSE OR ERROR PROCESSING")
+                // Нельзя прерывать Flow, поэтому ошибку игнорируем //throw RuntimeException(e.message.toString())
+                ConsolePrinter.printText(e.message.toString())
+            }
+        }
+    }  // .catch { e: Throwable -> throw AppError.from(e) }
+        .flowOn(Dispatchers.Default)
+
+    override suspend fun setAllVisible() {
+        postDao.setAllVisible()
+    }
+
+//    override suspend fun countHidden(): Int {
+//        return postDao.countHidden() ?: 0
+//    }
 
 }
