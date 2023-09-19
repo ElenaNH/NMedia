@@ -12,6 +12,7 @@ import ru.netology.nmedia.adapter.PostViewHolder
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.databinding.FragmentPostBinding
 import ru.netology.nmedia.util.ARG_POST_ID
+import ru.netology.nmedia.util.ARG_POST_UNCONFIRMED
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 class PostFragment : Fragment() {
@@ -45,8 +46,9 @@ class PostFragment : Fragment() {
             // Фильтровать неудобно, потому что вдруг нет такого id? Тогда список будет пустой
             // Это придется обрабатывать, усложняя код
             val current_post_id = arguments?.getLong(ARG_POST_ID) ?: 0
+            val current_post_unconfirmed = arguments?.getInt(ARG_POST_UNCONFIRMED) ?: 0
             state.posts.forEach { post ->
-                if (post.id == current_post_id) {
+                if ((post.id == current_post_id) && (post.unconfirmed == current_post_unconfirmed)) {
 
                     val currentViewHolder = PostViewHolder(binding.post, interactionListener)
                     currentViewHolder.bind(post)
@@ -57,12 +59,9 @@ class PostFragment : Fragment() {
         }
         // Подписка на однократную ошибку
         viewModel.postActionFailed.observe(viewLifecycleOwner) { // Сообщаем однократно
-            this.whenPostActionFailed(viewModel, it)
+            whenPostActionFailed(binding.root, viewModel, it)
         }
-        // Подписка на однократный успех
-        viewModel.postActionSucceed.observe(viewLifecycleOwner) { // Сообщаем однократно
-            this.whenPostActionSucceed(viewModel, it)
-        }
+
     }
 
     /* // Если уж передавать аргумент, то это должен быть целый пост;

@@ -20,6 +20,8 @@ import android.view.Gravity
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
+import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.enumeration.PostActionType
 
 
@@ -70,32 +72,51 @@ class FeedFragment : Fragment() {
         // Подписки:
 
         // Подписка на FeedModel - список сообщений и состояние этого списка
-        viewModel.data.observe(viewLifecycleOwner) { state ->
-            adapter.submitList(state.posts)
+        viewModel.dataState.observe(viewLifecycleOwner) { state ->
             binding.progress.isVisible = state.loading
-            binding.errorGroup.isVisible = state.error
-            binding.emptyText.isVisible = state.empty
+            if (state.error) {
+                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.retry_loading) { viewModel.loadPosts() }
+                    .show()
+            }
+            binding.refreshLayout.isRefreshing = state.refreshing
         }
+        viewModel.data.observe(viewLifecycleOwner) { data ->
+            adapter.submitList(data.posts)
+            binding.emptyText.isVisible = data.empty
+        }
+        viewModel.newerCount.observe(viewLifecycleOwner) {
+            // Если ответ сервера нулевой, то видимость плашки не меняем
+            // Если ненулевой, то по нашей логике первая пачка постов будет сразу видна
+            // А вторая и последующие пачки обновлений будут скрыты
+            // Вот тогда и покажем плашку
+            if (it > 0)
+                binding.someUnread.isVisible = true
+            // else - ничего не делаем, кнопка пропадет после обновления recyclerview и прокрутки
+        }
+
+        // Подписка на адаптер
+        adapter.registerAdapterDataObserver(object : AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (positionStart == 0) {
+                    binding.someUnread.isVisible = false
+                    binding.list.smoothScrollToPosition(0)
+                }
+            }
+        })
+
         // Подписка на однократную ошибку
         viewModel.postActionFailed.observe(viewLifecycleOwner) { // Сообщаем однократно
-            this.whenPostActionFailed(viewModel, it)
-        }
-        // Подписка на однократный успех
-        viewModel.postActionSucceed.observe(viewLifecycleOwner) { // Сообщаем однократно
-            this.whenPostActionSucceed(viewModel, it)
+            whenPostActionFailed(binding.root, viewModel, it)
+            if (it == PostActionType.ACTION_POST_LIKE_CHANGE) {
+                adapter.submitList(viewModel.data.value?.posts)
+            }
         }
 
     }
 
     private fun setListeners() {
         // Обработчики кликов
-
-        binding.retryButton.setOnClickListener {
-            viewModel.loadPosts()
-        }
-
-        // Пока что все обработчики либо в адаптере, либо в другом обработчике,
-        // fab не получилось сделать безопасно (не знаю, как сделать by lazy с аргументами)
 
         binding.fab.setOnClickListener {
             // Запуск фрагмента NewPostFragment
@@ -107,6 +128,19 @@ class FeedFragment : Fragment() {
                         viewModel.getDraftContent()  // В запускаемый фрагмент передаем содержимое черновика
                 }
             )
+
+        }
+
+        binding.refreshLayout.setOnRefreshListener {
+            viewModel.refresh()
+        }
+
+        binding.someUnread.setOnClickListener {
+            // Показать скрытые посты
+            viewModel.setAllVisible()
+            // Скрыть кнопку
+            it.isVisible = false
+            // Прокрутить к верхнему посту можно в наблюдателе за адаптером (подписаться на него)
 
         }
 
