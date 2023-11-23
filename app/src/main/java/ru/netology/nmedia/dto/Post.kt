@@ -1,5 +1,6 @@
 package ru.netology.nmedia.dto
 
+import android.graphics.drawable.Drawable
 import ru.netology.nmedia.enumeration.AttachmentType
 import ru.netology.nmedia.util.currentAuthor
 
@@ -22,15 +23,9 @@ fun Long.statisticsToString(): String {
     }
 }
 
-/*data class Attachment(
-    val url: String,
-    val description: String,
-    val type: String    // изначально только IMAGE
-)*/
-
 data class Attachment(
     val url: String,
-    val description: String?,
+    val description: String? = null, // этот параметр не удаляем, хоть и не используем его пока полноценно
     val type: AttachmentType,
 )
 
@@ -53,6 +48,7 @@ data class Post(
     val unconfirmed: Int = 0, // Все пришедшее с сервера будет "confirmed"
     val unsaved: Int = 0, // Все пришедшее с сервера будет "saved" (ведь на сервере нет этого поля)
     val hidden: Int,
+    val unsavedAttach: Int = 0,
 ) {
 
  companion object {
@@ -75,13 +71,7 @@ data class Post(
         }
     }
 
-    // это пора удалить - устарело
-/*    fun avatarFileName() = when (author) {
-        "Нетология", "Netology" -> "netology.jpg"
-        "Сбер" -> "sber.jpg"
-        "Тинькофф", "Tinkoff" -> "tcs.jpg"
-        else -> ""
-    }*/
+
 
 
 }

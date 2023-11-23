@@ -1,5 +1,6 @@
 package ru.netology.nmedia.api
 
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 //import retrofit2.Call
@@ -8,10 +9,11 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 import ru.netology.nmedia.BuildConfig
+import ru.netology.nmedia.dto.Media
 //Build Type 'debug' contains custom BuildConfig fields, but the feature is disabled.
 import ru.netology.nmedia.dto.Post
 
-private const val BASE_URL = "${BuildConfig.BASE_URL}/api/slow/"
+private const val BASE_URL_SERVICE = "${BuildConfig.BASE_URL}/api/slow/"
 
 private val logging = HttpLoggingInterceptor().apply {
     if (BuildConfig.DEBUG) {
@@ -25,7 +27,7 @@ private val okhttp = OkHttpClient.Builder()
 
 private val retrofit = Retrofit.Builder()
     .addConverterFactory(GsonConverterFactory.create())
-    .baseUrl(BASE_URL)
+    .baseUrl(BASE_URL_SERVICE)
     .client(okhttp)
     .build()
 
@@ -50,6 +52,10 @@ interface PostsApiService {
 
     @DELETE("posts/{id}/likes")
     suspend fun dislikeById(@Path("id") id: Long): Response<Post>
+
+    @Multipart
+    @POST("media")
+    suspend fun saveMedia(@Part part: MultipartBody.Part): Response<Media>
 }
 
 object PostsApi {
