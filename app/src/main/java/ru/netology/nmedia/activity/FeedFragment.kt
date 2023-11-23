@@ -9,20 +9,21 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 //import androidx.navigation.Navigation.findNavController  // этот не подходит
 //import androidx.navigation.findNavController  // и этот не подходит (но он использовался для перехода из активити)
+//import android.view.Gravity
+//import android.widget.Toast
+import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
+import com.google.android.material.snackbar.Snackbar
+import androidx.core.view.isVisible
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.uiview.PostInteractionListenerImpl // Было до клиент-серверной модели
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.viewmodel.PostViewModel
 import ru.netology.nmedia.databinding.FragmentFeedBinding
-//
-import android.view.Gravity
-import android.widget.Toast
-import androidx.core.view.isVisible
-import androidx.fragment.app.activityViewModels
-import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
-import com.google.android.material.snackbar.Snackbar
+import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.enumeration.PostActionType
+import ru.netology.nmedia.util.ConsolePrinter
 
 
 class FeedFragment : Fragment() {
@@ -123,9 +124,14 @@ class FeedFragment : Fragment() {
             findNavController().navigate(
                 R.id.action_feedFragment_to_newPostFragment,
                 Bundle().apply {
-                    //textArg = ""  // В запускаемый фрагмент передаем пустое содержимое нового поста
+                    ConsolePrinter.printText("Draft content for textArg = ${viewModel.getDraftContent()}")
+                    //Через вьюмодель
+                    viewModel.startEditing(viewModel.draft.value ?: Post.getEmptyPost())
+                    //Через аргумент
                     textArg =
                         viewModel.getDraftContent()  // В запускаемый фрагмент передаем содержимое черновика
+                    // Эта передача имеет смысл для двух разных активитей, а у нас фрагменты
+                    // так что это архаизм, и можно все передать через вьюмодель
                 }
             )
 
