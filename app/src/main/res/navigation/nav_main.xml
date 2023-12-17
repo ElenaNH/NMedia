@@ -36,26 +36,49 @@
         <action
             android:id="@+id/action_feedFragment_to_postFragment"
             app:destination="@id/postFragment" />
+        <action
+            android:id="@+id/action_feedFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
     </fragment>
     <fragment
         android:id="@+id/newPostFragment"
         android:name="ru.netology.nmedia.activity.NewPostFragment"
         android:label="fragment_new_post"
-        tools:layout="@layout/fragment_new_post" />
+        tools:layout="@layout/fragment_new_post">
+        <!--<action
+            android:id="@+id/action_newPostFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />-->
+    </fragment>
     <fragment
         android:id="@+id/imageFragment"
         android:name="ru.netology.nmedia.activity.ImageFragment"
         android:label="fragment_image"
-        tools:layout="@layout/fragment_image" />
+        tools:layout="@layout/fragment_image">
+        <action
+            android:id="@+id/action_imageFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <!-- Как и зачем создалась эта петля перехода на самого себя??? -->
+        <action
+            android:id="@+id/action_imageFragment_self"
+            app:destination="@id/imageFragment" />
+    </fragment>
     <fragment
         android:id="@+id/postFragment"
         android:name="ru.netology.nmedia.activity.PostFragment"
-        android:label="PostFragment" >
+        android:label="PostFragment">
         <action
             android:id="@+id/action_postFragment_to_newPostFragment"
             app:destination="@id/newPostFragment" />
         <action
             android:id="@+id/action_postFragment_to_imageFragment"
             app:destination="@id/imageFragment" />
+        <action
+            android:id="@+id/action_postFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="ru.netology.nmedia.activity.LoginFragment"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_login" />
 </navigation>

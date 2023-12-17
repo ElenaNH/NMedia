@@ -13,6 +13,7 @@ import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dto.Media
 //Build Type 'debug' contains custom BuildConfig fields, but the feature is disabled.
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.Token
 
 private const val BASE_URL_SERVICE = "${BuildConfig.BASE_URL}/api/slow/"
 
@@ -66,6 +67,14 @@ interface PostsApiService {
     @Multipart
     @POST("media")
     suspend fun saveMedia(@Part part: MultipartBody.Part): Response<Media>
+
+
+    // Запросы авторизации
+
+    @FormUrlEncoded
+    @POST("users/authentication")
+    suspend fun updateUser(@Field("login") login: String, @Field("pass") pass: String): Response<Token>
+
 }
 
 object PostsApi {
