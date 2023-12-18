@@ -28,6 +28,7 @@ import ru.netology.nmedia.viewmodel.AuthViewModel
 import android.app.AlertDialog
 import android.view.Gravity
 import androidx.activity.trackPipAnimationHintView
+import ru.netology.nmedia.uiview.goToRegister
 
 class AppActivity : AppCompatActivity(R.layout.activity_app) {
 
@@ -71,14 +72,14 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
 
                 override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                     // Определяем текущий отображаемый фрагмент
-                    val currentFragment = supportFragmentManager.getCurrentFragment()
+                    var currentFragment = supportFragmentManager.getCurrentFragment()
                     val rootFragment = supportFragmentManager.getRootFragment()
 
                     val stop9 = 9
 
                     // Обработка выбора меню и возврат true для обработанных
                     return when (menuItem.itemId) {
-                        R.id.auth, R.id.register -> {
+                        R.id.auth -> {
                             if (currentFragment != null) {
                                 goToLogin(currentFragment)
                             } else {
@@ -86,6 +87,15 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                             }
                             // Fix in HomeWork - прогрузку тестового токена заменить на авторизацию
                             //AppAuth.getInstance().setToken(Token(5L, "x-token"))
+                            true
+                        }
+
+                        R.id.register -> {
+                            if (currentFragment != null) {
+                                goToRegister(currentFragment)
+                            } else {
+                                val stop1 = 1 // мы тут не должны оказаться по идее
+                            }
                             true
                         }
 
