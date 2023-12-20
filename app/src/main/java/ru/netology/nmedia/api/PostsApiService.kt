@@ -9,9 +9,11 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 import ru.netology.nmedia.BuildConfig
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dto.Media
 //Build Type 'debug' contains custom BuildConfig fields, but the feature is disabled.
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.Token
 
 private const val BASE_URL_SERVICE = "${BuildConfig.BASE_URL}/api/slow/"
 
@@ -23,6 +25,15 @@ private val logging = HttpLoggingInterceptor().apply {
 
 private val okhttp = OkHttpClient.Builder()
     .addInterceptor(logging)
+    .addInterceptor { chain ->
+        AppAuth.getInstance().data.value?.token?.let { token ->
+            val newRequest = chain.request().newBuilder()
+                .addHeader("Authorization", token)
+                .build()
+            return@addInterceptor chain.proceed(newRequest)
+        }
+        chain.proceed(chain.request())
+    }
     .build()
 
 private val retrofit = Retrofit.Builder()
@@ -56,6 +67,44 @@ interface PostsApiService {
     @Multipart
     @POST("media")
     suspend fun saveMedia(@Part part: MultipartBody.Part): Response<Media>
+
+
+    // Запросы авторизации
+
+    @FormUrlEncoded
+    @POST("users/authentication")
+    suspend fun updateUser(
+        @Field("login") login: String,
+        @Field("pass") pass: String
+    ): Response<Token>
+
+    // Запросы регистрации
+
+    @FormUrlEncoded
+    @POST("users/registration")
+    suspend fun registerUser(
+        @Field("login") login: String,
+        @Field("pass") pass: String,
+        @Field("name") name: String
+    ): Response<Token>
+
+    @Multipart
+    @POST("users/registration")
+    suspend fun registerWithPhoto(
+        @Part("login") login: String,
+        @Part("pass") pass: String,
+        @Part("name") name: String,
+        @Part media: MultipartBody.Part? = null,
+    ): Response<Token>
+
+    /*    @Multipart
+        @POST("users/registration")
+        suspend fun registerWithPhoto(
+            @Part("login") login: RequestBody,
+            @Part("pass") pass: RequestBody,
+            @Part("name") name: RequestBody,
+            @Part media: MultipartBody.Part,
+        ): Response<Token>*/
 }
 
 object PostsApi {

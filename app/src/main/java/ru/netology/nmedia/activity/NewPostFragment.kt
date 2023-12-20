@@ -35,7 +35,6 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.model.photoModel
 import ru.netology.nmedia.uiview.loadImage
-import ru.netology.nmedia.util.BASE_URL
 import ru.netology.nmedia.util.ConsolePrinter
 
 class NewPostFragment : Fragment() {
@@ -166,6 +165,20 @@ class NewPostFragment : Fragment() {
                                 warnToast.setGravity(Gravity.CENTER_VERTICAL, 0, 0)
                                 warnToast.show()
                                 //return@setOnClickListener
+
+                            } else if (!viewModel.isAuthorized) {
+                                // Предупреждение о необходимости логина
+                                // (не должно появляться при правильных переходах)
+                                val warnToast = Toast.makeText(
+                                    activity,
+                                    getString(R.string.error_no_authorization),
+                                    Toast.LENGTH_SHORT
+                                )
+                                warnToast.setGravity(Gravity.CENTER_VERTICAL, 0, 0)
+                                warnToast.show()
+                                // Уходим отсюда
+                                AndroidUtils.hideKeyboard(requireView()) // скрываем клавиатуру
+                                findNavController().navigateUp()
 
                             } else {
                                 // Поскольку viewModel общая, то можно прямо тут сохраниться
