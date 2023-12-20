@@ -73,22 +73,38 @@ interface PostsApiService {
 
     @FormUrlEncoded
     @POST("users/authentication")
-    suspend fun updateUser(@Field("login") login: String, @Field("pass") pass: String): Response<Token>
+    suspend fun updateUser(
+        @Field("login") login: String,
+        @Field("pass") pass: String
+    ): Response<Token>
 
     // Запросы регистрации
 
     @FormUrlEncoded
     @POST("users/registration")
-    suspend fun registerUser(@Field("login") login: String, @Field("pass") pass: String, @Field("name") name: String): Response<Token>
+    suspend fun registerUser(
+        @Field("login") login: String,
+        @Field("pass") pass: String,
+        @Field("name") name: String
+    ): Response<Token>
 
-/*    @Multipart
+    @Multipart
     @POST("users/registration")
     suspend fun registerWithPhoto(
-        @Part("login") login: RequestBody,
-        @Part("pass") pass: RequestBody,
-        @Part("name") name: RequestBody,
-        @Part media: MultipartBody.Part,
-    ): Response<Token>*/
+        @Part("login") login: String,
+        @Part("pass") pass: String,
+        @Part("name") name: String,
+        @Part media: MultipartBody.Part? = null,
+    ): Response<Token>
+
+    /*    @Multipart
+        @POST("users/registration")
+        suspend fun registerWithPhoto(
+            @Part("login") login: RequestBody,
+            @Part("pass") pass: RequestBody,
+            @Part("name") name: RequestBody,
+            @Part media: MultipartBody.Part,
+        ): Response<Token>*/
 }
 
 object PostsApi {
