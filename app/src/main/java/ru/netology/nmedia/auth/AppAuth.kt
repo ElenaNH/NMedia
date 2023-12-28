@@ -2,9 +2,18 @@ package ru.netology.nmedia.auth
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.core.content.edit
+import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import ru.netology.nmedia.api.PostsApi
+import ru.netology.nmedia.api.PostsApiService
+import ru.netology.nmedia.dto.PushToken
 import ru.netology.nmedia.dto.Token
 
 class AppAuth private constructor(context: Context) {
@@ -37,6 +46,7 @@ class AppAuth private constructor(context: Context) {
         } else {
             _data.value = Token(id, token)
         }
+        sendPushToken() // поскольку данный синглтон создается при старте приложения
     }
 
     @Synchronized
@@ -45,12 +55,28 @@ class AppAuth private constructor(context: Context) {
         prefs.edit {
             putString(TOKEN_KEY, token.token)
             putLong(ID_KEY, token.id)
-        }
+        } // ? нужен ли после putLong в блоке apply() - в одном примере есть, в другом нет
+        sendPushToken()
     }
 
     fun clearAuth() {
         _data.value = null
-        prefs.edit { clear() }
+        prefs.edit { clear() } // ? нужен ли после clear еще и commit() - в одном примере есть, в другом нет
+        sendPushToken()
+    }
+
+    fun sendPushToken(token: String? = null) {
+        CoroutineScope(Dispatchers.Default).launch {
+            try {
+                val pushToken = PushToken(token ?: FirebaseMessaging.getInstance().token.await())
+                Log.d("pushToken", pushToken.toString())
+
+                PostsApi.retrofitService.sendPushToken(pushToken)
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
 }

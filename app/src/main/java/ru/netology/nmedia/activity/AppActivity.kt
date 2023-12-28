@@ -77,6 +77,8 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
 
                     val stop9 = 9
 
+                    // TODO Как сделать, чтобы имя пользователя отображалось в меню?
+
                     // Обработка выбора меню и возврат true для обработанных
                     return when (menuItem.itemId) {
                         R.id.auth -> {
