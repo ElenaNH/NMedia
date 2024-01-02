@@ -18,6 +18,7 @@ import ru.netology.nmedia.R
 import kotlin.random.Random
 import androidx.core.content.PermissionChecker
 import ru.netology.nmedia.auth.AppAuth
+import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.util.ConsolePrinter
 
 
@@ -46,24 +47,25 @@ class FCMService : FirebaseMessagingService() {
 //        Log.d("message received : ", "${message.data.keys}")
         ConsolePrinter.printText("message received : ")
 
-        message.data[content]?.let {
-            val simpleInfo = gson.fromJson(
-                message.data[content],
-                SimpleInfo::class.java
-            )
-            val userId = AppAuth.getInstance().data.value?.id 
-            ConsolePrinter.printText("userId=")
-            when {
-                (simpleInfo.recipientId == null) -> handleSimple(simpleInfo)
-                (simpleInfo.recipientId == userId) -> handleSimple(simpleInfo)
-                else -> {
-                    // Отправляем заново push-токен
-                    AppAuth.getInstance().sendPushToken()
+        try {
+            message.data[content]?.let {
+                val simpleInfo = gson.fromJson(
+                    message.data[content],
+                    SimpleInfo::class.java
+                )
+                val userId = DependencyContainer.getInstance().appAuth.data.value?.id
+                ConsolePrinter.printText("userId=")
+                when {
+                    (simpleInfo.recipientId == null) -> handleSimple(simpleInfo)
+                    (simpleInfo.recipientId == userId) -> handleSimple(simpleInfo)
+                    else -> {
+                        // Отправляем заново push-токен
+                        DependencyContainer.getInstance().appAuth.sendPushToken()
+                    }
                 }
             }
-        }
 
-        /*  message.data[action]?.let {
+            /*  message.data[action]?.let {
                if (!Action.values().map { elem -> elem.toString() }.contains(it)) return@let
                when (Action.valueOf(it)) {
                    Action.LIKE -> handleLike(gson.fromJson(message.data[content], Like::class.java))
@@ -76,13 +78,18 @@ class FCMService : FirebaseMessagingService() {
                }
            }*/
 
-        val myStop = 1  // Просто для точки останова
+            val myStop = 1  // Просто для точки останова
+
+        } catch (e: Exception) {
+            //        Log.d("message treating error : ")
+            ConsolePrinter.printText("message treating error : ")
+        }
     }
 
     override fun onNewToken(token: String) {
         // Печатает токен в консоль, но возможно сохранять в файл или базу и т.п.
         ConsolePrinter.printText("push-token=$token")
-        AppAuth.getInstance().sendPushToken(token) // отправка на сервер
+        DependencyContainer.getInstance().appAuth.sendPushToken(token) // отправка на сервер
     }
 
     private fun handleSimple(simpleInfo: SimpleInfo) {

@@ -1,5 +1,6 @@
 package ru.netology.nmedia.activity
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -9,28 +10,31 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
-//import androidx.fragment.app.activityViewModels
-//import androidx.navigation.fragment.findNavController
 import androidx.navigation.findNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.messaging.FirebaseMessaging
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
-import ru.netology.nmedia.auth.AppAuth
-import ru.netology.nmedia.dto.Token
-import ru.netology.nmedia.uiview.goToLogin
+import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.uiview.getCurrentFragment
 import ru.netology.nmedia.uiview.getRootFragment
+import ru.netology.nmedia.uiview.goToLogin
+import ru.netology.nmedia.uiview.goToRegister
 import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.viewmodel.AuthViewModel
-import android.app.AlertDialog
-import android.view.Gravity
-import androidx.activity.trackPipAnimationHintView
-import ru.netology.nmedia.uiview.goToRegister
+import ru.netology.nmedia.viewmodel.ViewModelFactory
 
 class AppActivity : AppCompatActivity(R.layout.activity_app) {
+    private val dependencyContainer = DependencyContainer.getInstance()
+    private val viewModel: AuthViewModel by viewModels(
+        factoryProducer = {
+            ViewModelFactory(
+                dependencyContainer.repository,
+                dependencyContainer.appAuth
+            )
+        }
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +60,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
         }
         checkGoogleApiAvailability()
 
-        val viewModel by viewModels<AuthViewModel>()
+//************************
 
         var oldMenuProvider: MenuProvider? = null
         viewModel.data.observe(this) {
@@ -114,7 +118,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                                     .setPositiveButton(getString(R.string.action_continue)) { dialog, which ->
                                         // Do something
                                         // Логоф
-                                        AppAuth.getInstance().clearAuth()
+                                        dependencyContainer.appAuth.clearAuth()
                                         // Уходим из режима редактирования в режим чтения
                                         if (currentFragment is NewPostFragment)
                                             rootFragment.navController.navigateUp()

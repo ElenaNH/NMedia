@@ -1,23 +1,19 @@
 package ru.netology.nmedia.activity
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.bumptech.glide.Glide
-import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentImageBinding
-import ru.netology.nmedia.databinding.FragmentPostBinding
-import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.model.photoModel
+import ru.netology.nmedia.di.DependencyContainer
+import ru.netology.nmedia.uiview.loadImage
 import ru.netology.nmedia.util.ARG_POST_ID
 import ru.netology.nmedia.util.ARG_POST_UNCONFIRMED
 import ru.netology.nmedia.viewmodel.PostViewModel
-import ru.netology.nmedia.uiview.loadImage
+import ru.netology.nmedia.viewmodel.ViewModelFactory
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -52,7 +48,16 @@ class ImageFragment : Fragment() {
             }
     }
 
-    private val viewModel: PostViewModel by activityViewModels()
+    private val dependencyContainer = DependencyContainer.getInstance()
+    private val viewModel: PostViewModel by viewModels(
+        ownerProducer = ::requireParentFragment,
+        factoryProducer = {
+            ViewModelFactory(
+                dependencyContainer.repository,
+                dependencyContainer.appAuth
+            )
+        }
+    )
 
     private lateinit var binding: FragmentImageBinding
 

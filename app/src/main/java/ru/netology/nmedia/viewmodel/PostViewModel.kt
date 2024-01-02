@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
-import ru.netology.nmedia.db.AppDb
+//import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.enumeration.AttachmentType
@@ -22,19 +22,17 @@ import ru.netology.nmedia.util.ConsolePrinter
 import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.File
 
-//import java.io.IOException
-//import kotlin.concurrent.thread
-
-
 private val emptyPost = Post.getEmptyPost()
 
-class PostViewModel(application: Application) : AndroidViewModel(application) {
-    // упрощённый вариант
-    private val repository: PostRepository =
-        PostRepositoryImpl(AppDb.getInstance(application).postDao())
+class PostViewModel(
+    private val repository: PostRepository,
+//    private val
+    appAuth: AppAuth,
+) : ViewModel() {
+    val appAuth2 = appAuth // TODO зачем было убирать private val? теперь компилится только через Париж
 
     val data: LiveData<FeedModel> =
-        AppAuth.getInstance().data.flatMapLatest { token ->
+        appAuth.data.flatMapLatest { token ->
             repository.data
                 .map { posts ->
                     posts.map { it.copy(ownedByMe = it.authorId == token?.id) }
@@ -43,9 +41,11 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
 
             .asLiveData(Dispatchers.Default)
+
     // Раз уж мы все равно используем AppAuth для преобразования данных, то и статус не помешает тоже
     val isAuthorized: Boolean
-        get() = AppAuth.getInstance().data.value != null    // Берем StateFlow и проверяем
+        get() = appAuth2.data.value != null    // Берем StateFlow и проверяем
+
 
     val edited = MutableLiveData(emptyPost)
     val draft = MutableLiveData(emptyPost)  // И будем сохранять это только "in memory"

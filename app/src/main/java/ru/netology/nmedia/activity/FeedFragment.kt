@@ -15,22 +15,32 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
 import com.google.android.material.snackbar.Snackbar
 import androidx.core.view.isVisible
+import androidx.fragment.app.viewModels
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.uiview.PostInteractionListenerImpl // Было до клиент-серверной модели
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.viewmodel.PostViewModel
 import ru.netology.nmedia.databinding.FragmentFeedBinding
+import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.enumeration.PostActionType
 import ru.netology.nmedia.uiview.goToLogin
 import ru.netology.nmedia.util.ConsolePrinter
+import ru.netology.nmedia.viewmodel.ViewModelFactory
 
 
 class FeedFragment : Fragment() {
-    //  viewModels используем теперь с аргументом, чтобы сделать общую viewModel для всех фрагментов
-//    val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
-    private val viewModel: PostViewModel by activityViewModels()
+    private val dependencyContainer = DependencyContainer.getInstance()
+    private val viewModel: PostViewModel by viewModels(
+        ownerProducer = ::requireParentFragment,
+        factoryProducer = {
+            ViewModelFactory(
+                dependencyContainer.repository,
+                dependencyContainer.appAuth
+            )
+        }
+    )
 
     // interactionListener должен быть доступен также из фрагмента PostFragment
     private val interactionListener by lazy { PostInteractionListenerImpl(viewModel, this) }

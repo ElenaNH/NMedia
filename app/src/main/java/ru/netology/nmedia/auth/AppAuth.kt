@@ -1,7 +1,6 @@
 package ru.netology.nmedia.auth
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
 import androidx.core.content.edit
 import com.google.firebase.messaging.FirebaseMessaging
@@ -11,13 +10,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import ru.netology.nmedia.api.PostsApi
-import ru.netology.nmedia.api.PostsApiService
+import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.dto.PushToken
 import ru.netology.nmedia.dto.Token
 
-class AppAuth private constructor(context: Context) {
-    companion object {
+class AppAuth(context: Context) {
+    private val TOKEN_KEY = "TOKEN_KEY"
+    private val ID_KEY = "ID_KEY"
+
+/*    companion object {
         private const val TOKEN_KEY = "TOKEN_KEY"
         private const val ID_KEY = "ID_KEY"
 
@@ -31,7 +32,7 @@ class AppAuth private constructor(context: Context) {
         fun getInstance(): AppAuth = requireNotNull(INSTANCE) {
             "You must call initApp before"
         }
-    }
+    }*/
 
     private val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
     private val _data = MutableStateFlow<Token?>(null) // Всегда можно узнать текущее значение
@@ -71,7 +72,8 @@ class AppAuth private constructor(context: Context) {
                 val pushToken = PushToken(token ?: FirebaseMessaging.getInstance().token.await())
                 Log.d("pushToken", pushToken.toString())
 
-                PostsApi.retrofitService.sendPushToken(pushToken)
+                DependencyContainer.getInstance().apiService.sendPushToken(pushToken)
+                // TODO  ПОЧЕМУ в лекции ...apiService.save(pushToken)
 
             } catch (e: Exception) {
                 e.printStackTrace()

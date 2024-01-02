@@ -7,20 +7,19 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.Response
-import ru.netology.nmedia.api.PostsApi
-import ru.netology.nmedia.auth.AppAuth
+import ru.netology.nmedia.R
 import ru.netology.nmedia.auth.LoginInfo
+import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.dto.Token
 import ru.netology.nmedia.util.ConsolePrinter
 import ru.netology.nmedia.util.SingleLiveEvent
-import ru.netology.nmedia.R
 
 class LoginViewModel : ViewModel() {
 
     // Результат попытки логина:
     // Успешный статус будем использовать для автоматического возврата в предыдущий фрагмент
     val isAuthorized: Boolean
-        get() = AppAuth.getInstance().data.value != null    // Берем StateFlow и проверяем
+        get() = DependencyContainer.getInstance().appAuth.data.value != null    // Берем StateFlow и проверяем
 
     private val _loginSuccessEvent = SingleLiveEvent<Unit>()
     val loginSuccessEvent: LiveData<Unit>
@@ -79,7 +78,7 @@ class LoginViewModel : ViewModel() {
     private suspend fun updateUser() {
         var response: Response<Token>? = null
         try {
-            response = PostsApi.retrofitService.updateUser(
+            response = DependencyContainer.getInstance().apiService.updateUser(
                 loginInfo.value?.login ?: "",
                 loginInfo.value?.password ?: ""
             )
@@ -98,7 +97,7 @@ class LoginViewModel : ViewModel() {
         val responseToken = response?.body() ?: throw RuntimeException("body is null")
 
         // Надо прогрузить токен в AppAuth
-        AppAuth.getInstance().setToken(responseToken)
+        DependencyContainer.getInstance().appAuth.setToken(responseToken)
 
     }
 
