@@ -5,30 +5,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-//import androidx.fragment.app.viewModels
 import androidx.fragment.app.activityViewModels
+//import androidx.fragment.app.viewModels
 import androidx.fragment.app.viewModels
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.uiview.PostInteractionListenerImpl
 import ru.netology.nmedia.adapter.PostViewHolder
-import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.databinding.FragmentPostBinding
-import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.util.ARG_POST_ID
 import ru.netology.nmedia.util.ARG_POST_UNCONFIRMED
 import ru.netology.nmedia.viewmodel.PostViewModel
-import ru.netology.nmedia.viewmodel.ViewModelFactory
 
+@AndroidEntryPoint
 class PostFragment : Fragment() {
-    private val dependencyContainer = DependencyContainer.getInstance()
-    private val viewModel: PostViewModel by viewModels(
-        ownerProducer = ::requireParentFragment,
-        factoryProducer = {
-            ViewModelFactory(
-                dependencyContainer.repository,
-                dependencyContainer.appAuth
-            )
-        }
-    )
+    //    private val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
+    private val viewModel: PostViewModel by activityViewModels()
 
     private val interactionListener by lazy { PostInteractionListenerImpl(viewModel, this) }
     private lateinit var binding: FragmentPostBinding // надо сделать by lazy

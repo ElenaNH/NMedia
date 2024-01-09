@@ -7,9 +7,10 @@ import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.PushToken
 import ru.netology.nmedia.dto.Token
+import ru.netology.nmedia.dto.User
 
 
-interface PostsApiService {
+interface ApiService {
     @GET("posts")
     suspend fun getAll(): Response<List<Post>>
 
@@ -73,6 +74,14 @@ interface PostsApiService {
 //            @Part media: MultipartBody.Part,
 //        ): Response<Token>
 
+
+    @FormUrlEncoded
+    @POST("users/{id}")
+    suspend fun getUser(
+        @Field("login") login: String,
+        @Field("pass") pass: String,
+        @Field("name") name: String
+    ): Response<User>
 
     // Отправка push-токена
     @POST("users/push-tokens")

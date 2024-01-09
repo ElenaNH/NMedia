@@ -7,26 +7,28 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
-import kotlin.random.Random
-import androidx.core.content.PermissionChecker
 import ru.netology.nmedia.auth.AppAuth
-import ru.netology.nmedia.di.DependencyContainer
+import kotlin.random.Random
 import ru.netology.nmedia.util.ConsolePrinter
+import javax.inject.Inject
 
-
+@AndroidEntryPoint
 class FCMService : FirebaseMessagingService() {
     private val action = "action"
     private val content = "content"
     private val channelId = "remote"
     private val gson = Gson()
+
+    @Inject
+    lateinit var appAuth: AppAuth
 
     override fun onCreate() {
         super.onCreate()
@@ -53,14 +55,14 @@ class FCMService : FirebaseMessagingService() {
                     message.data[content],
                     SimpleInfo::class.java
                 )
-                val userId = DependencyContainer.getInstance().appAuth.data.value?.id
+                val userId = appAuth.data.value?.id
                 ConsolePrinter.printText("userId=")
                 when {
                     (simpleInfo.recipientId == null) -> handleSimple(simpleInfo)
                     (simpleInfo.recipientId == userId) -> handleSimple(simpleInfo)
                     else -> {
                         // Отправляем заново push-токен
-                        DependencyContainer.getInstance().appAuth.sendPushToken()
+                        appAuth.sendPushToken()
                     }
                 }
             }
@@ -89,7 +91,7 @@ class FCMService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         // Печатает токен в консоль, но возможно сохранять в файл или базу и т.п.
         ConsolePrinter.printText("push-token=$token")
-        DependencyContainer.getInstance().appAuth.sendPushToken(token) // отправка на сервер
+        appAuth.sendPushToken(token) // отправка на сервер
     }
 
     private fun handleSimple(simpleInfo: SimpleInfo) {

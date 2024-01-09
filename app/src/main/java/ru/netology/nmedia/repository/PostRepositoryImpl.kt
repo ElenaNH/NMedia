@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.map
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import retrofit2.Response
-import ru.netology.nmedia.api.PostsApiService
+import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.Media
@@ -23,11 +23,12 @@ import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.model.photoModel
 import ru.netology.nmedia.util.ConsolePrinter
+import javax.inject.Inject
 
 
-class PostRepositoryImpl(
+class PostRepositoryImpl @Inject constructor(
     private val postDao: PostDao,
-    private val apiService: PostsApiService,
+    private val apiService: ApiService,
 ) : PostRepository {
     override val data: Flow<List<Post>> = postDao.getAll()
         .map { it.toDto() }  //.map { it.map { entity -> entity.copy(hidden = 0) }.toDto() } - скрытых мы не достанем оттуда

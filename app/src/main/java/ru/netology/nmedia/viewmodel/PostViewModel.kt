@@ -1,8 +1,8 @@
 package ru.netology.nmedia.viewmodel
 
-import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.*
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.flatMapLatest
@@ -21,10 +21,10 @@ import ru.netology.nmedia.repository.*
 import ru.netology.nmedia.util.ConsolePrinter
 import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.File
+import javax.inject.Inject
 
-private val emptyPost = Post.getEmptyPost()
-
-class PostViewModel(
+@HiltViewModel
+class PostViewModel @Inject constructor(
     private val repository: PostRepository,
 //    private val
     appAuth: AppAuth,
@@ -47,8 +47,14 @@ class PostViewModel(
         get() = appAuth2.data.value != null    // Берем StateFlow и проверяем
 
 
-    val edited = MutableLiveData(emptyPost)
-    val draft = MutableLiveData(emptyPost)  // И будем сохранять это только "in memory"
+    fun emptyPostForCurrentUser() = Post.getEmptyPost().copy(
+        authorId = appAuth2.currentUser().id,
+        author = appAuth2.currentUser().name,
+        authorAvatar = appAuth2.currentUser().avatar,
+    )
+
+    val edited = MutableLiveData(emptyPostForCurrentUser())
+    val draft = MutableLiveData(emptyPostForCurrentUser())  // И будем сохранять это только "in memory"
 
     val newerCount: LiveData<Int> = data.switchMap {
         repository.getNewerCount(it.posts
@@ -171,7 +177,7 @@ class PostViewModel(
                 quitEditing() // сбрасываем редактирование при попытке записи (заменим на emptyPost)
                 ConsolePrinter.printText("After quitEditing() call...")
                 // Черновик сбросим, т.к. у нас будет либо подтвержденный, либо неподтвержденный пост
-                setDraft(emptyPost)
+                setDraft(emptyPostForCurrentUser())
 
             }
 
@@ -238,14 +244,14 @@ class PostViewModel(
     }
 
     fun quitEditing() {
-        edited.value = emptyPost
+        edited.value = emptyPostForCurrentUser()
     }
 
     fun setDraft(post: Post?) {
         // Черновик только для нового поста и только если вышли без сохранения
         if (post?.id == 0L)
             draft.value = post?.copy(content = post.content.trim())
-                ?: emptyPost
+                ?: emptyPostForCurrentUser()
     }
 
     fun getDraftContent(): String {

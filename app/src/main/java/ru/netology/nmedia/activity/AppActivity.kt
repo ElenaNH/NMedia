@@ -14,27 +14,25 @@ import androidx.navigation.findNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.messaging.FirebaseMessaging
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
-import ru.netology.nmedia.di.DependencyContainer
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.uiview.getCurrentFragment
 import ru.netology.nmedia.uiview.getRootFragment
 import ru.netology.nmedia.uiview.goToLogin
 import ru.netology.nmedia.uiview.goToRegister
 import ru.netology.nmedia.util.AndroidUtils
 import ru.netology.nmedia.viewmodel.AuthViewModel
-import ru.netology.nmedia.viewmodel.ViewModelFactory
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class AppActivity : AppCompatActivity(R.layout.activity_app) {
-    private val dependencyContainer = DependencyContainer.getInstance()
-    private val viewModel: AuthViewModel by viewModels(
-        factoryProducer = {
-            ViewModelFactory(
-                dependencyContainer.repository,
-                dependencyContainer.appAuth
-            )
-        }
-    )
+
+    @Inject
+    lateinit var appAuth: AppAuth
+
+    private val viewModel: AuthViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,6 +70,13 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                     val authorized = viewModel.isAuthorized
                     menu.setGroupVisible(R.id.authorized, authorized)
                     menu.setGroupVisible(R.id.unauthorized, !authorized)
+
+                    // TODO - КАК НАМ ПОНЯТЬ, ЧТО ИМЕННО НУЛЕВОЙ ИНДЕКС У НАШЕГО ЛОГАУТА?
+                    menu.getItem(0).setTitle(
+                        this@AppActivity.getString(R.string.logout)
+                            .plus(" ")
+                            .plus(appAuth.currentUser().login)
+                    )
                 }
 
                 override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -118,7 +123,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                                     .setPositiveButton(getString(R.string.action_continue)) { dialog, which ->
                                         // Do something
                                         // Логоф
-                                        dependencyContainer.appAuth.clearAuth()
+                                        appAuth.clearAuth()
                                         // Уходим из режима редактирования в режим чтения
                                         if (currentFragment is NewPostFragment)
                                             rootFragment.navController.navigateUp()

@@ -4,22 +4,30 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import ru.netology.nmedia.R
+import ru.netology.nmedia.api.ApiService
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auth.RegisterInfo
-import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.dto.Token
+import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.util.ConsolePrinter
 import ru.netology.nmedia.util.SingleLiveEvent
+import javax.inject.Inject
 
-class RegisterViewModel : ViewModel() {
+@HiltViewModel
+class RegisterViewModel @Inject constructor(
+    private val apiService: ApiService,
+    private val appAuth: AppAuth,
+) : ViewModel() {
 
     // Результат попытки регистрации:
     // Успешный статус будем использовать для автоматического возврата в предыдущий фрагмент
     val isAuthorized: Boolean
-        get() = DependencyContainer.getInstance().appAuth.data.value != null    // Берем StateFlow и проверяем
+        get() = appAuth.data.value != null    // Берем StateFlow и проверяем
 
     private val _registerSuccessEvent = SingleLiveEvent<Unit>()
     val registerSuccessEvent: LiveData<Unit>
@@ -79,7 +87,7 @@ class RegisterViewModel : ViewModel() {
     private suspend fun registerUser() {
         var response: Response<Token>? = null
         try {
-            response = DependencyContainer.getInstance().apiService.registerUser(
+            response = apiService.registerUser(
                 registerInfo.value?.login ?: "",
                 registerInfo.value?.password ?: "",
                 registerInfo.value?.username ?: "",
@@ -99,7 +107,11 @@ class RegisterViewModel : ViewModel() {
         val responseToken = response?.body() ?: throw RuntimeException("body is null")
 
         // Надо прогрузить токен в AppAuth
-        DependencyContainer.getInstance().appAuth.setToken(responseToken)
+//        DependencyContainer.getInstance().appAuth.setToken(responseToken)
+        appAuth.setTokenAndLogin(
+            responseToken,
+            registerInfo.value?.login ?: ""
+        )
 
     }
 
