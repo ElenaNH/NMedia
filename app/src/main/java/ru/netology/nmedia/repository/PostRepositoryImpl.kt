@@ -1,5 +1,8 @@
 package ru.netology.nmedia.repository
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -30,9 +33,15 @@ class PostRepositoryImpl @Inject constructor(
     private val postDao: PostDao,
     private val apiService: ApiService,
 ) : PostRepository {
-    override val data: Flow<List<Post>> = postDao.getAll()
-        .map { it.toDto() }  //.map { it.map { entity -> entity.copy(hidden = 0) }.toDto() } - скрытых мы не достанем оттуда
-        .flowOn(Dispatchers.Default)
+    // data : Flow<PagingData<Post>>
+    override val data = Pager(
+        config = PagingConfig(pageSize = 10, enablePlaceholders = false),
+        pagingSourceFactory = { PostPagingSource(apiService) }
+    ).flow
+
+    /*override val data: Flow<List<Post>> = postDao.getAll()
+        .map { it.toDto() }
+        .flowOn(Dispatchers.Default)*/
 
 
     override suspend fun getAll() {
@@ -44,7 +53,14 @@ class PostRepositoryImpl @Inject constructor(
         // ******************************************************************************
 
         // Запросим список постов с сервера
-        val response = apiService.getAll()
+        lateinit var response: Response<List<Post>>
+        try {
+            response = apiService.getAll()
+        } catch (e: Exception) {
+            ConsolePrinter.printText("HAVE NOT GOT SAVE RESPONSE")
+            // Просто выбрасываем ошибку, а пост висит в очереди на запись
+            throw RuntimeException(e.message.toString())
+        }
         if (!response.isSuccessful) {
             throw RuntimeException(response.message())
         }
@@ -71,9 +87,15 @@ class PostRepositoryImpl @Inject constructor(
         // Сюда дошли, значит можно вкинуть на сервер кучу подвисших новых/удаляемых постов
         // Пока отдельными частями протолкнем
         // При неуспехе мы вываливаемся отсюда в вызывающую функцию
-        pushLocalSelected(PostSelectionType.SELECTION_DELETED)
-        pushLocalSelected(PostSelectionType.SELECTION_UNCONFIRMED)
-        pushLocalSelected(PostSelectionType.SELECTION_CONFIRMED_UNSAVED)
+        try {
+            pushLocalSelected(PostSelectionType.SELECTION_DELETED)
+            pushLocalSelected(PostSelectionType.SELECTION_UNCONFIRMED)
+            pushLocalSelected(PostSelectionType.SELECTION_CONFIRMED_UNSAVED)
+        } catch (e: Exception) {
+            ConsolePrinter.printText("CANNOT EXECUTE pushLocalSelected()")
+            // Просто выбрасываем ошибку
+            throw RuntimeException(e.message.toString())
+        }
     }
 
     suspend fun pushLocalSelected(postSelectionType: PostSelectionType) {

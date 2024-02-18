@@ -56,9 +56,10 @@ class ImageFragment : Fragment() {
         // Находим наш пост
         val current_post_id = arguments?.getLong(ARG_POST_ID) ?: 0
         val current_post_unconfirmed = arguments?.getInt(ARG_POST_UNCONFIRMED) ?: 0
-        val post = viewModel.data.value?.posts?.filter {
+        val post = viewModel.emptyPostForCurrentUser()
+        /*val post = viewModel.data.value?.posts?.filter {
             (it.id == current_post_id) && (it.unconfirmed == current_post_unconfirmed)
-        }?.first()
+        }?.first()*/
 
         loadImage(post, binding.photo)
 
