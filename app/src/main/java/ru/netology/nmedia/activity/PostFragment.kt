@@ -8,7 +8,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 //import androidx.fragment.app.viewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import ru.netology.nmedia.uiview.PostInteractionListenerImpl
 import ru.netology.nmedia.adapter.PostViewHolder
 import ru.netology.nmedia.databinding.FragmentPostBinding
@@ -43,7 +45,13 @@ class PostFragment : Fragment() {
     private fun subscribe() {
 
         // Подписка на список сообщений
-        viewModel.data.observe(viewLifecycleOwner) { state ->
+        lifecycleScope.launchWhenCreated {
+            viewModel.data.collectLatest {
+                val currentViewHolder = PostViewHolder(binding.post, interactionListener)
+                currentViewHolder.bind(viewModel.emptyPostForCurrentUser())
+            }
+        }
+        /*viewModel.data.observe(viewLifecycleOwner) { state ->
             // далее перерисовка только нашего поста
             // Фильтровать неудобно, потому что вдруг нет такого id? Тогда список будет пустой
             // Это придется обрабатывать, усложняя код
@@ -58,7 +66,8 @@ class PostFragment : Fragment() {
                     return@forEach  // Если один нашли, то остальные не обрабатываем, даже с таким же id
                 }
             }
-        }
+        }*/
+
         // Подписка на однократную ошибку
         viewModel.postActionFailed.observe(viewLifecycleOwner) { // Сообщаем однократно
             whenPostActionFailed(binding.root, viewModel, it)
