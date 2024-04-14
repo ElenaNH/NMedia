@@ -13,6 +13,7 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.PostRemoteKeyEntity
 import ru.netology.nmedia.error.ApiError
+import ru.netology.nmedia.util.ConsolePrinter
 import java.io.IOException
 
 // PagingSource<Long, Post> (Long - это тип уникального идентификатора для класса Post)
@@ -72,32 +73,39 @@ class PostRemoteMediator(
                         //postDao.clear()   - Не затирать предыдущий кэш при обновлении
 
                         if (postDaoEmpty) {
+                            // Для пустого списка делаем реальный рефреш
                             postRemoteKeyDao.insert(
                                 listOf(
                                     PostRemoteKeyEntity(
                                         PostRemoteKeyEntity.KeyType.AFTER,
                                         body.first().id
                                     ),
-                                PostRemoteKeyEntity(
-                                    PostRemoteKeyEntity.KeyType.BEFORE,
-                                    body.last().id
-                                ),  // Два элемента обеспечат первичный REFRESH
+                                    PostRemoteKeyEntity(
+                                        PostRemoteKeyEntity.KeyType.BEFORE,
+                                        body.last().id
+                                    ),  // Два элемента обеспечат первичный REFRESH
                                 )
                             )
                         } else {
+                            // Это PREPEND вместо REFRESH
                             postRemoteKeyDao.insert(
                                 listOf(
                                     PostRemoteKeyEntity(
                                         PostRemoteKeyEntity.KeyType.AFTER,
                                         body.first().id
                                     ),
-//                                PostRemoteKeyEntity(
-//                                    PostRemoteKeyEntity.KeyType.BEFORE,
-//                                    body.last().id
-//                                ),  // Это отключить, поскольку должен быть PREPEND вместо REFRESH
                                 )
                             )
                         }
+                    }
+
+                    LoadType.APPEND -> {
+                        postRemoteKeyDao.insert(
+                            PostRemoteKeyEntity(
+                                PostRemoteKeyEntity.KeyType.BEFORE,
+                                body.last().id
+                            ),
+                        )
                     }
 
 //              Сюда НЕ МОЖЕМ ПОПАСТЬ, поскольку ранее выходим по return
@@ -109,25 +117,19 @@ class PostRemoteMediator(
 //                            ),
 //                        )
                     }
-
-                    LoadType.APPEND -> {
-                        postRemoteKeyDao.insert(
-                            PostRemoteKeyEntity(
-                                PostRemoteKeyEntity.KeyType.BEFORE,
-                                body.last().id
-                            ),
-                        )
-                    }
                 }
 
+                // Теперь, когда
                 postDao.insert(body.map(PostEntity.Companion::fromDto))  //postDao.insert(body.map{ PostEntity.fromDto(it) })
 
             }
+
 // Завершение обработки локальной БД
 
             return MediatorResult.Success(body.isEmpty()) // Успех, если сюда дошли
 
         } catch (e: IOException) {
+            ConsolePrinter.printText("PostRemoteMediator.load ERROR!!!")
             return MediatorResult.Error(e)
         }
     }
