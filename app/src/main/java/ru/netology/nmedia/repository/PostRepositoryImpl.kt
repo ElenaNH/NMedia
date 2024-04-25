@@ -25,6 +25,7 @@ import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.entity.PostEntity
+import ru.netology.nmedia.entity.PostRemoteKeyEntity
 import ru.netology.nmedia.entity.fromDto
 import ru.netology.nmedia.entity.toDto
 import ru.netology.nmedia.enumeration.AttachmentType
@@ -44,9 +45,13 @@ class PostRepositoryImpl @Inject constructor(
     appDb: AppDb,
 ) : PostRepository {
 
+    private val pageSizeDefault = 5
+    private val postRemoteKeyDaoRpt = postRemoteKeyDao
+    private val appDbRpt = appDb
+
     @OptIn(ExperimentalPagingApi::class)
     override val data: Flow<PagingData<FeedItem>> = Pager(
-        config = PagingConfig(pageSize = 5, enablePlaceholders = false),
+        config = PagingConfig(pageSize = pageSizeDefault, enablePlaceholders = false),
         pagingSourceFactory = { postDao.getPagingSource() },
         remoteMediator = PostRemoteMediator(
             service = apiService,
@@ -76,8 +81,14 @@ class PostRepositoryImpl @Inject constructor(
 
         // Запросим список постов с сервера
         lateinit var response: Response<List<Post>>
+        val idMaxLocal = postRemoteKeyDaoRpt.max() ?: 0
         try {
-            response = apiService.getAll()
+            //response = apiService.getAll()
+            //response = apiService.getLatest(pageSizeDefault * 3) // Или лучше getNewer??
+            response = if (idMaxLocal == 0L)
+                apiService.getLatest(pageSizeDefault * 3)
+            else
+                apiService.getNewer(idMaxLocal)
         } catch (e: Exception) {
             ConsolePrinter.printText("HAVE NOT GOT SAVE RESPONSE")
             // Просто выбрасываем ошибку, а пост висит в очереди на запись
@@ -90,6 +101,7 @@ class PostRepositoryImpl @Inject constructor(
         // Если данные пришли хорошие, то
 
         // Исключим из обновления несохраненные изменения и запланированные удаления
+// (Вообще-то, в данной версии мы взяли getNewer, так что пересечение нулевое! - УЛУЧШИТЬ)
         val confirmedUnsavedEntities = postDao.getAllConfirmedUnsaved()
         val waitedDeleteEntities = postDao.getAllDeleted()
         val excludeIds = confirmedUnsavedEntities.map { it.id }
@@ -103,9 +115,35 @@ class PostRepositoryImpl @Inject constructor(
             } // Если была команда на полное обновление, то ничего не скрываем, все visible
 
         // Обновим только то, что не нужно прежде проталкивать на сервер (только новое и не измененное)
-        if (postEntitiesForInserting.count() > 0)
-            postDao.insert(postEntitiesForInserting)
-
+        if (postEntitiesForInserting.count() > 0) {
+            with(appDbRpt) {   // Либо все действия делаем, либо ничего
+                postDao.insert(postEntitiesForInserting)
+                if (idMaxLocal == 0L)
+                    postRemoteKeyDaoRpt.insert(
+                        listOf(
+                            PostRemoteKeyEntity(
+                                PostRemoteKeyEntity.KeyType.AFTER,
+                                postEntitiesForInserting.first().id
+                            ),
+                            PostRemoteKeyEntity(
+                                PostRemoteKeyEntity.KeyType.BEFORE,
+                                postEntitiesForInserting.last().id
+                            ),  // Два элемента обеспечат первичный REFRESH
+                        )
+                    )
+                else
+                    postRemoteKeyDaoRpt.insert(
+                        listOf(
+                            PostRemoteKeyEntity(
+                                PostRemoteKeyEntity.KeyType.AFTER,
+                                postEntitiesForInserting.first().id
+                            ),
+                        )
+                    )
+// В данном случае мы загружаемся после нового входа
+                postDao.setAllVisible()
+            }
+        }
         // Сюда дошли, значит можно вкинуть на сервер кучу подвисших новых/удаляемых постов
         // Пока отдельными частями протолкнем
         // При неуспехе мы вываливаемся отсюда в вызывающую функцию
@@ -384,7 +422,7 @@ class PostRepositoryImpl @Inject constructor(
 
     override fun getNewerCount(id: Long): Flow<Int> = flow<Int> {
         // Пока я не типизировала интом (flow<Int>), справа отображалось {this:FlowCollector<Nothing>
-        // Почему??? Ведь в п римерах было просто flow!!!
+        // Почему??? Ведь в примерах было просто flow!!!
         while (true) {
             delay(120_000L)  // delay(10_000L)
             var response: Response<List<Post>>
