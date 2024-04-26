@@ -13,6 +13,7 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.PostRemoteKeyEntity
 import ru.netology.nmedia.error.ApiError
+import ru.netology.nmedia.util.ConsolePrinter
 import java.io.IOException
 
 // PagingSource<Long, Post> (Long - это тип уникального идентификатора для класса Post)
@@ -36,8 +37,12 @@ class PostRemoteMediator(
                     if (postDaoEmpty) {
                         service.getLatest(state.config.pageSize)
                     } else {
+                    // Кажется, при таком обновлении мы только одну (несколько?) страницу добавляем сверху?
+                        // TODO - подумать, не изменить ли на getNewer()
+                        // но если новых будет слишком много, то все зависнет!
+                        // Или же передать большой размер страницы? Пока оставим так:
                         val id = postRemoteKeyDao.max() ?: return MediatorResult.Success(false)
-                        service.getAfter(id, state.config.pageSize)
+                        service.getAfter(id, state.config.pageSize * 3) //3 было в примере
                     }
                 }
 
@@ -48,7 +53,7 @@ class PostRemoteMediator(
 
                     // Мы выходим с успехом, как будто все записали в базу,
                     // но на самом деле ничего не записываем
-                    return MediatorResult.Success(true)
+                    return MediatorResult.Success(false)  //при true не увидим загрузку
                 }
 
                 LoadType.APPEND -> {
@@ -64,70 +69,72 @@ class PostRemoteMediator(
 
             val body = result.body() ?: throw ApiError(result.code(), result.message())
 
+            if (body.count() > 0) { // Чтобы не падало на body.first().id, body.last().id
 // Локальная БД (транзакция)
-            with(appDb) {
-                when (loadType) {
-                    LoadType.REFRESH -> {
+                with(appDb) {
+                    when (loadType) {
+                        LoadType.REFRESH -> {
 
-                        //postDao.clear()   - Не затирать предыдущий кэш при обновлении
+                            //postDao.clear()   - Не затирать предыдущий кэш при обновлении
 
-                        if (postDaoEmpty) {
+                            if (postDaoEmpty) {
+                                // Для пустого списка делаем реальный рефреш
+                                postRemoteKeyDao.insert(
+                                    listOf(
+                                        PostRemoteKeyEntity(
+                                            PostRemoteKeyEntity.KeyType.AFTER,
+                                            body.first().id
+                                        ),
+                                        PostRemoteKeyEntity(
+                                            PostRemoteKeyEntity.KeyType.BEFORE,
+                                            body.last().id
+                                        ),  // Два элемента обеспечат первичный REFRESH
+                                    )
+                                )
+                            } else {
+                                // Это PREPEND вместо REFRESH
+                                postRemoteKeyDao.insert(
+                                    listOf(
+                                        PostRemoteKeyEntity(
+                                            PostRemoteKeyEntity.KeyType.AFTER,
+                                            body.first().id
+                                        ),
+                                    )
+                                )
+                            }
+                        }
+
+                        LoadType.APPEND -> {
                             postRemoteKeyDao.insert(
-                                listOf(
-                                    PostRemoteKeyEntity(
-                                        PostRemoteKeyEntity.KeyType.AFTER,
-                                        body.first().id
-                                    ),
                                 PostRemoteKeyEntity(
                                     PostRemoteKeyEntity.KeyType.BEFORE,
                                     body.last().id
-                                ),  // Два элемента обеспечат первичный REFRESH
-                                )
-                            )
-                        } else {
-                            postRemoteKeyDao.insert(
-                                listOf(
-                                    PostRemoteKeyEntity(
-                                        PostRemoteKeyEntity.KeyType.AFTER,
-                                        body.first().id
-                                    ),
-//                                PostRemoteKeyEntity(
-//                                    PostRemoteKeyEntity.KeyType.BEFORE,
-//                                    body.last().id
-//                                ),  // Это отключить, поскольку должен быть PREPEND вместо REFRESH
-                                )
+                                ),
                             )
                         }
-                    }
 
 //              Сюда НЕ МОЖЕМ ПОПАСТЬ, поскольку ранее выходим по return
-                    LoadType.PREPEND -> {
+                        LoadType.PREPEND -> {
 //                        postRemoteKeyDao.insert(
 //                            PostRemoteKeyEntity(
 //                                PostRemoteKeyEntity.KeyType.AFTER,
 //                                body.first().id
 //                            ),
 //                        )
+                        }
                     }
 
-                    LoadType.APPEND -> {
-                        postRemoteKeyDao.insert(
-                            PostRemoteKeyEntity(
-                                PostRemoteKeyEntity.KeyType.BEFORE,
-                                body.last().id
-                            ),
-                        )
-                    }
+                    // Теперь, когда уточнили границы id постов, вставим преобразованные посты
+                    postDao.insert(body.map(PostEntity.Companion::fromDto))  //postDao.insert(body.map{ PostEntity.fromDto(it) })
+
                 }
-
-                postDao.insert(body.map(PostEntity.Companion::fromDto))  //postDao.insert(body.map{ PostEntity.fromDto(it) })
-
-            }
 // Завершение обработки локальной БД
+            }  // Завершение обработки непустого списка постов
 
             return MediatorResult.Success(body.isEmpty()) // Успех, если сюда дошли
 
         } catch (e: IOException) {
+            ConsolePrinter.printText("PostRemoteMediator.load ERROR!!!")
             return MediatorResult.Error(e)
         }
     }
