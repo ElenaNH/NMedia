@@ -1,6 +1,9 @@
 package ru.netology.nmedia.adapter
 
+import android.animation.ObjectAnimator
+import android.animation.PropertyValuesHolder
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.core.view.isVisible
@@ -66,7 +69,29 @@ class PostsAdapter(private val onInteractionListener: OnInteractionListener) :
         }
     }
 
+    // Для работы с Payload переопределим метод onBindViewHolder с третьим аргументом - payloads
+    override fun onBindViewHolder(
+        holder: RecyclerView.ViewHolder,
+        position: Int,
+        payloads: List<Any>  //MutableList<Any>
+    ) {
+        //super.onBindViewHolder(holder, position, payloads)
+        if (payloads.isEmpty()) { // Для пустого списка вызываем другой одноименный метод
+            onBindViewHolder(holder, position)
+        } else if (holder is PostViewHolder) {
+            payloads.forEach {
+                // Обновим только те элементы, которые поменялись
+                (it as? Payload)?.let { payload ->
+                    holder.bind(payload)
+                }
+            }
+        } else {
+            onBindViewHolder(holder, position) // Если это не пост, то тоже по-старому
+        }
+    }
+
 }
+
 
 class AdViewHolder(
     private val binding: CardAdBinding,
@@ -163,7 +188,40 @@ class PostViewHolder(
 
         }
     }
+
+    // Специально для работы с Payload (чтобы не обновлять лишнее)
+    fun bind(payload: Payload) {
+        payload.likes?.let {
+            binding.ibtnLikes.text =
+                it.toLong().statisticsToString() // Число лайков прямо на кнопке
+        }
+        payload.likedByMe?.let {
+            // Изменение значения флажка, которое вызовет изменение картинки
+            binding.ibtnLikes.isChecked = it
+            // Дополнительно можно задать анимацию картинки
+            if (it) {
+                // При лайке
+                ObjectAnimator.ofPropertyValuesHolder(
+                    binding.ibtnLikes,
+                    PropertyValuesHolder.ofFloat(View.SCALE_X, 1.0F, 1.2F, 1.0F),
+                    PropertyValuesHolder.ofFloat(View.SCALE_Y, 1.0F, 1.2F, 1.0F)
+                )
+            } else {
+                // При дизлайке
+                ObjectAnimator.ofFloat(binding.ibtnLikes, View.ROTATION, 0F, 360F)
+            }.start() // Запуск назначенной анимации
+        }
+        payload.content?.let {
+            binding.messageContent.text = it
+        }
+    }
+
 }
 
+data class Payload(
+    val likes: Int? = null, // null при отстутствии изменений; новое значение при наличии
+    val likedByMe: Boolean? = null, // null при отстутствии изменений; новое значение при наличии
+    val content: String? = null,
+)
 
 
